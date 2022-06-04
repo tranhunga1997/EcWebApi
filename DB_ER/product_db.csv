@@ -1,0 +1,10 @@
+create_datetime,update_datetime,description,end_datetime,name,price,short_description,slug,start_datetime,thumbnail_url,brand_id,category_id
+2021/12/30 16:23,2021/12/30 16:23,description 1,,product 1,490797,short description 1,product-1,2022/4/2 0:00,,2,3
+2021/12/30 16:23,2021/12/30 16:23,description 2,,product 2,320342,short description 2,product-2,2022/12/20 0:00,,1,3
+2021/12/30 16:23,2021/12/30 16:23,description 3,2021/9/4 0:00,product 3,171000,short description 3,product-3,2021/8/7 0:00,,3,2
+2021/12/30 16:23,2021/12/30 16:23,description 4,2021/3/6 0:00,product 4,41391,short description 4,product-4,2021/2/6 0:00,,1,3
+2021/12/30 16:23,2021/12/30 16:23,description 5,2022/1/27 16:23,product 5,36079,short description 5,product-5,2021/12/30 16:23,,3,3
+2021/12/30 16:23,2021/12/30 16:23,description 6,2022/1/27 16:23,product 6,213848,short description 6,product-6,2021/12/30 16:23,,3,2
+2021/12/30 16:23,2021/12/30 16:23,description 7,2022/2/14 0:00,product 7,384586,short description 7,product-7,2022/1/17 0:00,,3,1
+2021/12/30 16:23,2021/12/30 16:23,description 8,2022/10/24 0:00,product 8,385280,short description 8,product-8,2022/9/26 0:00,,2,2
+2021/12/30 16:23,2021/12/30 16:23,description 9,2022/10/8 0:00,product 9,128818,short description 9,product-9,2022/9/10 0:00,,2,1

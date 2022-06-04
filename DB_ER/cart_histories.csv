@@ -1,0 +1,8 @@
+address,bought_datetime,price,product_name,quantity,user_id
+ABC,2021/12/16 00:00:00,490797,product 1,9,11
+ABC,2021/11/22 00:00:00,171000,product 3,3,11
+ABC,2021/10/15 00:00:00,41391,product 4,3,11
+ABC,2021/11/30 00:00:00,490797,product 1,11,11
+ABC,2021/11/16 00:00:00,490797,product 1,12,11
+ABC,2021/11/16 00:00:00,320342,product 2,6,2
+ABC,2021/11/05 00:00:00,320342,product 2,10,2
