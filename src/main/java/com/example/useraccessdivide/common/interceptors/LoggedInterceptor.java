@@ -1,4 +1,4 @@
-package com.example.useraccessdivide.user.interceptors;
+package com.example.useraccessdivide.common.interceptors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

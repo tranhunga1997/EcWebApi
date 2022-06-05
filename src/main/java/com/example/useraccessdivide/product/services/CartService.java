@@ -1,17 +1,18 @@
 package com.example.useraccessdivide.product.services;
 
-import com.example.useraccessdivide.product.dtos.CartProductDto;
-import com.example.useraccessdivide.product.dtos.PaginationDataDto;
-import com.example.useraccessdivide.product.entities.CartItemEntity;
-import com.example.useraccessdivide.product.repositories.CartRepository;
-import com.example.useraccessdivide.user.services.UserService;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.example.useraccessdivide.common.Pagingation;
+import com.example.useraccessdivide.product.dtos.CartProductDto;
+import com.example.useraccessdivide.product.entities.CartItemEntity;
+import com.example.useraccessdivide.product.repositories.CartRepository;
+import com.example.useraccessdivide.user.services.UserService;
 
 @Service
 public class CartService {
@@ -22,7 +23,7 @@ public class CartService {
     @Autowired
     ProductService productService;
 
-    public PaginationDataDto<CartProductDto> findByUserId(long userId, int currentPage){
+    public Pagingation<CartProductDto> findByUserId(long userId, int currentPage){
         List<CartProductDto> cartProductDtos = new ArrayList<>();
         Page<CartItemEntity> page = cartRepository.findByUserId(userId, PageRequest.of(currentPage, 5));
         page.forEach(e -> {
@@ -32,14 +33,14 @@ public class CartService {
             cartProductDto.setQuantity(e.getQuantity());
             cartProductDtos.add(cartProductDto);
         });
-        PaginationDataDto<CartProductDto> dataDto = new PaginationDataDto<CartProductDto>(cartProductDtos, page.getTotalElements(), page.getTotalPages());
+        Pagingation<CartProductDto> dataDto = new Pagingation<CartProductDto>(cartProductDtos, page.getTotalElements(), page.getTotalPages());
         return dataDto;
     }
     // code day
     public void save(long userId, long productId, int quantity){
         try {
             CartItemEntity entity = new CartItemEntity();
-            entity.setUser(userService.findById(userId).get());
+            entity.setUser(userService.findById(userId));
             entity.setProduct(productService.findById(productId).get());
             entity.setQuantity(quantity);
             cartRepository.save(entity);

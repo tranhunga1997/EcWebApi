@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -16,6 +17,6 @@ public class Permission extends BaseEntity implements Serializable{
 	private static final long serialVersionUID = -1900437945700954619L;
 	@NonNull
     private String permissionName;
-    @NonNull
+    @Column(unique = true, nullable = false)
     private String permissionKey;
 }

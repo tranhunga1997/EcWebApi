@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.example.useraccessdivide.user.interceptors.AuthenticationInterceptor;
-import com.example.useraccessdivide.user.interceptors.LoggedInterceptor;
+import com.example.useraccessdivide.common.interceptors.AuthenticationInterceptor;
+import com.example.useraccessdivide.common.interceptors.LoggedInterceptor;
 
 /**
  * Class cấu hình filter

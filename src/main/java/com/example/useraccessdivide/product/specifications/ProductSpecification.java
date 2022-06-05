@@ -1,6 +1,22 @@
 package com.example.useraccessdivide.product.specifications;
 
-import com.example.useraccessdivide.product.dtos.PaginationDataDto;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import com.example.useraccessdivide.common.Pagingation;
 import com.example.useraccessdivide.product.entities.BrandEntity;
 import com.example.useraccessdivide.product.entities.CategoryEntity;
 import com.example.useraccessdivide.product.entities.ProductEntity;
@@ -8,21 +24,6 @@ import com.example.useraccessdivide.product.entities.meta.ProductSearch_;
 import com.example.useraccessdivide.product.forms.ProductSearchForm;
 import com.example.useraccessdivide.product.services.BrandService;
 import com.example.useraccessdivide.product.services.CategoryService;
-import com.example.useraccessdivide.user.entities.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public final class ProductSpecification {
@@ -49,7 +50,7 @@ public final class ProductSpecification {
 
     }
 
-    public PaginationDataDto<ProductEntity> filter(ProductSearchForm form, int currentPage){
+    public Pagingation<ProductEntity> filter(ProductSearchForm form, int currentPage){
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<ProductEntity> query = builder.createQuery(ProductEntity.class);
         Root<ProductEntity> root = query.from(ProductEntity.class);
@@ -95,7 +96,7 @@ public final class ProductSpecification {
         TypedQuery<ProductEntity> result = entityManager.createQuery(query);
         List<ProductEntity> resultList = result.getResultList();
         
-        PaginationDataDto<ProductEntity> page = new PaginationDataDto<ProductEntity>();
+        Pagingation<ProductEntity> page = new Pagingation<ProductEntity>();
         page.setDatas(resultList.stream().skip(offSet).limit(limit).collect(Collectors.toList()));
         page.setTotalElement(resultList.size());
         page.setTotalPage(Math.round(resultList.size()/limit));

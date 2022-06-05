@@ -21,10 +21,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.useraccessdivide.common.Pagingation;
+import com.example.useraccessdivide.common.exception.MyException;
 import com.example.useraccessdivide.common.utils.EmailUtil;
 import com.example.useraccessdivide.product.dtos.CartHistoryDto;
 import com.example.useraccessdivide.product.dtos.CartProductDto;
-import com.example.useraccessdivide.product.dtos.PaginationDataDto;
 import com.example.useraccessdivide.product.entities.ProductEntity;
 import com.example.useraccessdivide.product.forms.CartHistoryForm;
 import com.example.useraccessdivide.product.forms.CartProductForm;
@@ -51,7 +52,7 @@ public class CartApi {
 
     @ApiOperation(value = "Xem giỏ hàng")
     @GetMapping
-    ResponseEntity<PaginationDataDto<CartProductDto>> view(long userId, @RequestParam("page") int currentPage){
+    ResponseEntity<Pagingation<CartProductDto>> view(long userId, @RequestParam("page") int currentPage){
         return ResponseEntity.ok(cartService.findByUserId(userId, currentPage));
     }
 
@@ -78,7 +79,7 @@ public class CartApi {
     
     @ApiOperation(value = "Thanh toán", notes = "chưa tích hợp api thanh toán.")
     @PostMapping("/pay/{userId}")
-    ResponseEntity pay(@PathVariable long userId, @RequestBody List<CartProductForm> forms) {
+    ResponseEntity pay(@PathVariable long userId, @RequestBody List<CartProductForm> forms) throws MyException {
     	// xóa giỏ hàng 
     	cartService.delete(userId);
     	
@@ -113,7 +114,7 @@ public class CartApi {
     	Map<String, Object> map = new HashMap<>();
     	map.put("productList", cartHistoryDtos);
     	map.put("total", total);
-    	String email = userService.findById(userId).get().getEmail();
+    	String email = userService.findById(userId).getEmail();
     	try {
 			EmailUtil.sendHtmlMail(email, "Danh sách các sản phẩm đã thanh toán", EmailUtil.readHtmlTemplateFile("product", map));
 		} catch (MessagingException e1) {

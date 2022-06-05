@@ -5,8 +5,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.example.useraccessdivide.common.exception.MyException;
 import com.example.useraccessdivide.user.entities.User;
 import com.example.useraccessdivide.user.repositories.RoleRepository;
 import com.example.useraccessdivide.user.repositories.UserRepository;
@@ -21,17 +25,25 @@ public class UserService {
     @Autowired
     private RoleRepository roleRepository;
 
-    public Optional<User> findById(long id){
-        return userRepository.findById(id);
+    public User findById(long id) throws MyException{
+    	Optional<User> optional = userRepository.findById(id);
+    	if(optional.isEmpty()) {
+    		throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản");
+    	}
+        return optional.get();
     }
 
-//    public void saveAndFlush(User user){
-//        user.setUpdateDatetime(LocalDateTime.now());
-//        user.setEnable(true);
-//        if(user.getRole() == null)
-//            user.setRole(roleRepository.findByRoleKey("user"));
-//        userRepository.saveAndFlush(user);
-//    }
+    public User findByUsername(String username) throws MyException {
+    	Optional<User> optional = userRepository.findByUsername(username);
+    	if(optional.isEmpty()) {
+    		throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản");
+    	}
+    	return optional.get();
+    }
+    
+    public Page<User> findAll(Pageable pageable) {
+    	return userRepository.findAll(pageable);
+    }
     
     public User saveAndFlush(User user){
         user.setUpdateDatetime(LocalDateTime.now());
@@ -68,10 +80,10 @@ public class UserService {
         return false;
     }
 
-    public User findByEmail(String email){
+    public User findByEmail(String email) throws MyException{
         Optional<User> userOptional = userRepository.findByEmail(email);
-        if(!userOptional.isPresent()){
-            return null;
+        if(userOptional.isEmpty()){
+            throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản");
         }
         return userOptional.get();
     }

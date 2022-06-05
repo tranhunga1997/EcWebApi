@@ -1,4 +1,4 @@
-package com.example.useraccessdivide.product.dtos;
+package com.example.useraccessdivide.common;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PaginationDataDto<T> {
+public class Pagingation<T> {
 	private List<T> datas;
 	private long totalElement;
 	private int totalPage;

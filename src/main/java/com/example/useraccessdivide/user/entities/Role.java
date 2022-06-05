@@ -15,13 +15,15 @@ import java.util.Set;
 @Getter@Setter
 public class Role extends BaseEntity implements Serializable{
 	private static final long serialVersionUID = 6336634263973676038L;
-	@NotNull
+	@Column(unique = true, nullable = false)
     private String roleKey;
     private String roleName;
 
-    @ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.REFRESH)
     @JoinTable(name = "roles_permissions",
     joinColumns = {@JoinColumn(name = "role_id")},
     inverseJoinColumns = {@JoinColumn(name = "permission_id")})
     private Set<Permission> permissions = new HashSet<>();
+    
+    
 }

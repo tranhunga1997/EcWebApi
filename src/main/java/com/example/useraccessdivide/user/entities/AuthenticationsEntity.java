@@ -21,7 +21,7 @@ public class AuthenticationsEntity implements Serializable {
 
 	private static final long serialVersionUID = 3731825700751979127L;
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "auth_seq")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	@Column(nullable = false)
 	private int historyId;

@@ -1,9 +1,26 @@
 package com.example.useraccessdivide.product.apis;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.useraccessdivide.common.Pagingation;
 import com.example.useraccessdivide.common.utils.CommonUtils;
-import com.example.useraccessdivide.product.dtos.CartProductDto;
-import com.example.useraccessdivide.product.dtos.PaginationDataDto;
-import com.example.useraccessdivide.product.entities.CartHistoryEntity;
 import com.example.useraccessdivide.product.entities.ProductEntity;
 import com.example.useraccessdivide.product.exceptions.ImageNotExtensionException;
 import com.example.useraccessdivide.product.forms.ProductForm;
@@ -15,28 +32,8 @@ import com.example.useraccessdivide.product.specifications.ProductSpecification;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping("/api/product")
@@ -60,7 +57,7 @@ public class ProductApi {
 
     @ApiOperation(value = "Xem và tìm kiếm sản phẩm")
     @GetMapping
-    ResponseEntity<PaginationDataDto<ProductEntity>> productView(ProductSearchForm form, @RequestParam("page") int currentPage){
+    ResponseEntity<Pagingation<ProductEntity>> productView(ProductSearchForm form, @RequestParam("page") int currentPage){
     	form.setPriceOrder(form.getPriceOrder() == null ? "asc" : form.getPriceOrder());
         return ResponseEntity.ok(productSpecification.filter(form, currentPage));
     }

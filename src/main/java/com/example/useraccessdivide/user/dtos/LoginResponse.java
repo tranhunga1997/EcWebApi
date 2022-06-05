@@ -5,12 +5,10 @@ import lombok.Data;
 @Data
 public class LoginResponse {
     private String accessToken;
-    private static final String tokenType = "Bearer ";
-    private String msg;
+    private final String tokenType = "Bearer ";
 
-    public LoginResponse(String accessToken, String msg) {
+    public LoginResponse(String accessToken) {
         this.accessToken = accessToken;
-        this.msg = msg;
     }
 
 }

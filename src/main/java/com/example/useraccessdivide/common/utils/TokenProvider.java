@@ -14,6 +14,7 @@ import com.example.useraccessdivide.common.exception.MyException;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -29,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TokenProvider {
 
     private static final String JWT_SECRET = "111111111111111111";
-    private static final long JWT_EXPIRATION = 1*1*60*60L;
+    private static final long JWT_EXPIRATION = 1*1*30*60L;	// ngày*giờ*phút*giây
 
     /**
      * Khởi tạo jwt 
@@ -71,24 +72,16 @@ public class TokenProvider {
     }
     
     /**
-     * Kiểm tra secret key jwt
-     * @param authToken
-     * @return
+     * Kiểm tra tính chính xác và hiệu lực jwt
+     * @param jwt
+     * @throws MyException 
      */
-    private static boolean validateJwt(String authToken){
+    private static void validateJwt(String jwt) throws MyException{
         try{
-            Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(authToken);
-            return true;
-        } catch (MalformedJwtException ex) {
-            log.error("Invalid JWT token");
-        } catch (ExpiredJwtException ex) {
-            log.error("Expired JWT token");
-        } catch (UnsupportedJwtException ex) {
-            log.error("Unsupported JWT token");
-        } catch (IllegalArgumentException ex) {
-            log.error("JWT claims string is empty.");
-        }
-        return false;
+            Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(jwt);
+    	} catch (JwtException e) {
+    		throw new MyException(HttpStatus.BAD_REQUEST, "0001", "MSG_W0001", "JWT");
+    	}
     }
 
     /**
@@ -103,10 +96,17 @@ public class TokenProvider {
      * Kiểm tra hiệu lực jwt
      * @param jwt
      * @return true hết hiệu lực, false còn hiệu lực 
+     * @throws MyException 
+     * validateJwt thay thế
      */
-    private static boolean isTokenExpired(String jwt){
-        Claims claims = Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(jwt).getBody();
-        return claims.getExpiration().after(new Date()) ? false : true;
+    @Deprecated
+    private static boolean isTokenExpired(String jwt) throws MyException{
+    	try {
+	        Claims claims = Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(jwt).getBody();
+	        return claims.getExpiration().after(new Date()) ? false : true;
+    	} catch (Exception e) {
+    		throw new MyException(HttpStatus.BAD_REQUEST, "0001", "MSG_W0001", "JWT");
+    	}
     }
 
     /**
@@ -118,12 +118,13 @@ public class TokenProvider {
     private static String getJwtFromRequest(HttpServletRequest request) throws MyException{
         String bearToken = request.getHeader("Authorization");
         if(!StringUtils.hasText(bearToken) || !bearToken.startsWith("Bearer ")){
-            throw new MyException(HttpStatus.BAD_REQUEST, "0001", "MSG_W0001", "JWT");
-        } else if(isTokenExpired(bearToken)) {
-        	throw new MyException(HttpStatus.BAD_REQUEST, "0001", "MSG_W0001", "JWT");
-        } else if (!validateJwt(bearToken)) {
+            // kiểm tra token type (bearer)
         	throw new MyException(HttpStatus.BAD_REQUEST, "0001", "MSG_W0001", "JWT");
         }
+        
+        bearToken = bearToken.replace("Bearer ", "");
+        // kiểm tra jwt
+        validateJwt(bearToken);
         return bearToken;
     }
 }

@@ -14,6 +14,8 @@ public class RegisterForm {
     private String password;
     @Pattern(regexp = "^[a-zA-Z0-9]{6,20}$", message = "chỉ được nhập chữ và số (độ dài 6~20).")
     private String matchPassword;
+    
+    @NotBlank
     @Email
     private String email;
     private String firstName;
