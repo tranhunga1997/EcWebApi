@@ -107,7 +107,7 @@ public class AuthenticationService {
 			throw new MyException(HttpStatus.BAD_REQUEST, "0005", "MSG_W0004");
 		} else if (authEntity.getAuthenticationCounter() >= CommonConstant.LOGIN_FAILED_NUM) {
 			userRepository.updateEnableUser(user.getId(), false);
-			throw new MyException(HttpStatus.BAD_REQUEST, "0006", "MSG_W0005", loginFailedNumber);
+			throw new MyException(HttpStatus.BAD_REQUEST, "0006", "MSG_W0005", CommonConstant.LOGIN_FAILED_NUM);
 		}
 	}
 	
