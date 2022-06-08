@@ -33,8 +33,8 @@ public class PermissionService {
         return optional.get();
     }
 
-    public Set<Permission> findByIds(List<Long> permissionIdList){
-        return permissionRepository.findAllById(permissionIdList).stream().collect(Collectors.toSet());
+    public List<Permission> findByIds(List<Long> permissionIdList){
+        return permissionRepository.findAllById(permissionIdList);
     }
 
     public Permission save(Permission permission){

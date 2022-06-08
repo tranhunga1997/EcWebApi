@@ -3,13 +3,13 @@ package com.example.useraccessdivide.user.apis;
 import java.time.LocalDateTime;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -34,6 +34,10 @@ import com.example.useraccessdivide.common.exception.MyException;
 import com.example.useraccessdivide.common.utils.CommonUtils;
 import com.example.useraccessdivide.common.utils.TokenProvider;
 import com.example.useraccessdivide.user.dtos.LoginResponse;
+import com.example.useraccessdivide.user.dtos.RoleDetailDto;
+import com.example.useraccessdivide.user.dtos.RoleDto;
+import com.example.useraccessdivide.user.dtos.UserDetailDto;
+import com.example.useraccessdivide.user.dtos.UserDto;
 import com.example.useraccessdivide.user.entities.AuthenticationsEntity;
 import com.example.useraccessdivide.user.entities.Permission;
 import com.example.useraccessdivide.user.entities.RefreshTokenEntity;
@@ -73,9 +77,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api")
 @Api(value = "User Api", tags = { "api tài khoản" })
 public class UserApi {
-
-	static final int PAGE_SIZE = 5;
-
 	@Autowired
 	private UserSpecification userSpecification;
 	@Autowired
@@ -192,15 +193,16 @@ public class UserApi {
 	@ApiOperation(value = "Xem thông tin chi tiết", authorizations = @Authorization(value = "thông tin khớp với username"))
 	@ApiResponses(value = { @ApiResponse(code = 401, message = "") })
 	@GetMapping("/user/detail/{username}")
-	ResponseEntity<User> userDetail(HttpServletRequest request, @PathVariable String username) throws MyException {
+	ResponseEntity<UserDetailDto> userDetail(HttpServletRequest request, @PathVariable String username) throws MyException {
 		String authenticatedUsername = TokenProvider.getUsername(request);
 		if (!username.equals(authenticatedUsername)) {
 			throw new MyException(HttpStatus.NOT_FOUND, "9999", "MSG_W9999");
 		}
-
+		UserDetailDto userDetailDto = new UserDetailDto();
 		User user = authService.loadUserByUsername(username);
+		BeanUtils.copyProperties(user, userDetailDto);
 
-		return ResponseEntity.ok(user);
+		return ResponseEntity.ok(userDetailDto);
 	}
 
 	@ApiOperation(value = "Sửa thông tin chi tiết")
@@ -268,18 +270,19 @@ public class UserApi {
 
 	@ApiOperation(value = "Xem tất cả tài khoản")
 	@GetMapping("/admin/list-user")
-	ResponseEntity<Pagingation<User>> userList(HttpServletRequest request, @ApiParam(value = "null is find all") UserForm userForm,
+	ResponseEntity<Pagingation<UserDto>> userList(HttpServletRequest request, @ApiParam(value = "null is find all") UserForm userForm,
 			@RequestParam(defaultValue = "1") int page) throws MyException, Exception {
 		checkPermission(CommonConstant.VIEW_USER_PER, TokenProvider.getUsername(request));
 		
-		Page<User> userPage = null;
-		if (CommonUtils.isNull(userForm)) {
-			userPage = userService.findAll(PageRequest.of(page - 1, PAGE_SIZE));
-		} else {
-			userPage = userSpecification.filter(userForm, PageRequest.of(page - 1, PAGE_SIZE));
-		}
+		Page<User> userPage = userSpecification.filter(userForm, PageRequest.of(page - 1, CommonConstant.PAGE_SIZE));
+		List<UserDto> userDtos = new ArrayList<UserDto>();
+		userPage.stream().forEach(u -> {
+			UserDto dto = new UserDto();
+			BeanUtils.copyProperties(u, dto);
+			userDtos.add(dto);
+		});
 		return ResponseEntity
-				.ok(new Pagingation<>(userPage.toList(), userPage.getTotalElements(), userPage.getTotalPages()));
+				.ok(new Pagingation<>(userDtos, userPage.getTotalElements(), userPage.getTotalPages()));
 	}
 
 	@ApiOperation(value = "Mở và khóa tài khoản")
@@ -304,23 +307,41 @@ public class UserApi {
 		return ResponseEntity.ok().build();
 	}
 
-	@ApiOperation(value = "Xem role chi tiết")
+	@ApiOperation(value = "Tìm kiếm thông tin role")
 	@GetMapping("/admin/role")
-	ResponseEntity<Pagingation<Role>> viewRole(HttpServletRequest request, String roleName, @RequestParam(defaultValue = "1") int page) throws MyException, Exception {
+	ResponseEntity<Pagingation<RoleDto>> viewRole(HttpServletRequest request, String roleName, @RequestParam(defaultValue = "1") int page) throws MyException, Exception {
 		checkPermission(CommonConstant.VIEW_ROLE_PER, TokenProvider.getUsername(request));
 		
-		int pageSize = 1;
 		Page<Role> pageRole = null;
 
 		if (CommonUtils.isNull(roleName)) {
-			pageRole = roleService.findAll(PageRequest.of(page - 1, pageSize));
+			pageRole = roleService.findAll(PageRequest.of(page - 1, CommonConstant.PAGE_SIZE));
 		} else {
-			pageRole = roleService.findByName(roleName, PageRequest.of(page - 1, pageSize));
+			pageRole = roleService.findByName(roleName, PageRequest.of(page - 1, CommonConstant.PAGE_SIZE));
 		}
+		
+		List<RoleDto> roleDtos = new ArrayList<>();
+		pageRole.stream().forEach(r -> {
+			RoleDto dto = new RoleDto();
+			BeanUtils.copyProperties(r, dto);
+			roleDtos.add(dto);
+		});
+		
 		return ResponseEntity
-				.ok(new Pagingation<>(pageRole.toList(), pageRole.getTotalElements(), pageRole.getTotalPages()));
+				.ok(new Pagingation<>(roleDtos, pageRole.getTotalElements(), pageRole.getTotalPages()));
 	}
 
+	@ApiOperation(value = "Thông tin role chi tiết")
+	@GetMapping("/admin/role/{roleId}")
+	ResponseEntity<RoleDetailDto> viewDetailRole(HttpServletRequest request, @PathVariable long roleId) throws Exception {
+		checkPermission(CommonConstant.VIEW_ROLE_PER, TokenProvider.getUsername(request));
+		
+		Role role = roleService.findById(roleId);
+		RoleDetailDto roleDetailDto = new RoleDetailDto();
+		BeanUtils.copyProperties(role, roleDetailDto);
+		return ResponseEntity.ok(roleDetailDto);
+	}
+	
 	@ApiOperation(value = "Thêm role")
 	@ApiResponses(value = { @ApiResponse(code = 400, message = "Thất bại") })
 	@PostMapping("/admin/role")
@@ -343,7 +364,7 @@ public class UserApi {
 		checkPermission(CommonConstant.UPDATE_ROLE_PER, TokenProvider.getUsername(request));
 		
 		Role role = roleService.findById(id);
-		Set<Permission> permissions = permissionService.findByIds(form.getPermissionIds());
+		List<Permission> permissions = permissionService.findByIds(form.getPermissionIds());
 		role.setRoleKey(CommonUtils.toSlug(form.getRoleName()));
 		role.setPermissions(permissions);
 		role.setUpdateDatetime(LocalDateTime.now());
@@ -368,9 +389,9 @@ public class UserApi {
 		
 		Page<Permission> perPage = null;
 		if(StringUtils.hasText(name)) {
-			perPage = permissionService.findByName(name, PageRequest.of(page, PAGE_SIZE));
+			perPage = permissionService.findByName(name, PageRequest.of(page, CommonConstant.PAGE_SIZE));
 		} else {
-			perPage = permissionService.findAll(PageRequest.of(page, PAGE_SIZE));
+			perPage = permissionService.findAll(PageRequest.of(page, CommonConstant.PAGE_SIZE));
 		}
 		
 		return ResponseEntity.ok(new Pagingation<>(perPage.toList(), perPage.getTotalElements(), perPage.getTotalPages()));
@@ -384,7 +405,7 @@ public class UserApi {
 	 */
 	private void checkPermission(String permissionKey, String username) throws Exception {
 		User user = userService.findByUsername(username);
-		Set<Permission> permissions = user.getRole().getPermissions();
+		List<Permission> permissions = user.getRole().getPermissions();
 		
 		boolean isMatch = permissions.stream().anyMatch(p -> permissionKey.equals(p.getPermissionKey()));
 		if(!isMatch) {

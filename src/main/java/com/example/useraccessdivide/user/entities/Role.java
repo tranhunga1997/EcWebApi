@@ -6,11 +6,16 @@ import lombok.Setter;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 @Table(name = "roles")
 @Getter@Setter
 public class Role extends BaseEntity implements Serializable{
@@ -19,11 +24,14 @@ public class Role extends BaseEntity implements Serializable{
     private String roleKey;
     private String roleName;
 
-    @ManyToMany(cascade = CascadeType.REFRESH)
+    @ManyToMany
     @JoinTable(name = "roles_permissions",
     joinColumns = {@JoinColumn(name = "role_id")},
     inverseJoinColumns = {@JoinColumn(name = "permission_id")})
-    private Set<Permission> permissions = new HashSet<>();
+    private List<Permission> permissions = new ArrayList<Permission>();
     
-    
+    @Override
+    public String toString() {
+    	return String.format("id= %s, roleKey= %s, roleName= %s", super.getId(), roleKey, roleName);
+    }
 }

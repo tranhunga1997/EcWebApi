@@ -11,4 +11,7 @@ public class CommonConstant {
 	public static final String ADD_NEW_PRODUCT_PER = "add-new-product-info";
 	public static final String UPDATE_PRODUCT_PER = "delete-product-info";
 	public static final String DELETE_PRODUCT_PER = "update-product-info";
+	public static final int PAGE_SIZE = 10;
+	public static final int REFRESH_TOKEN_EXPYRIED_DAY = 3;
+	public static final int LOGIN_FAILED_NUM = 5;
 }

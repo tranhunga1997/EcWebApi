@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.example.useraccessdivide.common.constant.CommonConstant;
 import com.example.useraccessdivide.common.exception.MyException;
 import com.example.useraccessdivide.common.utils.TokenProvider;
 import com.example.useraccessdivide.user.entities.RefreshTokenEntity;
@@ -17,8 +18,6 @@ public class RefreshTokenService {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
     
-    private static final Integer TOKEN_EXPIRY_DAY = 3;
-    
     /**
      * <dd>Giải thích: tạo mới refresh token (hạn 3 ngày)
      * @param userId
@@ -28,7 +27,7 @@ public class RefreshTokenService {
     public RefreshTokenEntity createToken(long userId, String ipAddress) {
     	RefreshTokenEntity newToken = new RefreshTokenEntity();
     	newToken.setRefreshToken(TokenProvider.generateRefreshToken());
-    	newToken.setExpiryDatetime(TOKEN_EXPIRY_DAY);
+    	newToken.setExpiryDatetime(CommonConstant.REFRESH_TOKEN_EXPYRIED_DAY);
     	newToken.setIpAddress(ipAddress);
     	newToken.setUserId(userId);
     	return refreshTokenRepository.saveAndFlush(newToken);

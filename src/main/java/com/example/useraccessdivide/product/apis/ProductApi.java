@@ -57,9 +57,9 @@ public class ProductApi {
 
     @ApiOperation(value = "Xem và tìm kiếm sản phẩm")
     @GetMapping
-    ResponseEntity<Pagingation<ProductEntity>> productView(ProductSearchForm form, @RequestParam("page") int currentPage){
+    ResponseEntity<Pagingation<ProductEntity>> productView(ProductSearchForm form, @RequestParam(name = "page", defaultValue = "1") int currentPage){
     	form.setPriceOrder(form.getPriceOrder() == null ? "asc" : form.getPriceOrder());
-        return ResponseEntity.ok(productSpecification.filter(form, currentPage));
+        return ResponseEntity.ok(productSpecification.filter(form, currentPage-1));
     }
 
     @ApiOperation(value = "Thêm sản phẩm mới")
@@ -117,7 +117,7 @@ public class ProductApi {
     
     @ApiOperation(value = "Xóa sản phẩm")
     @DeleteMapping("/{id}")
-    ResponseEntity delete(@PathVariable long id){
+    ResponseEntity<?> delete(@PathVariable long id){
         productService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

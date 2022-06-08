@@ -27,7 +27,12 @@ public class User extends BaseEntity implements Serializable{
     private String lastName;
     private boolean enable;
     
-    @ManyToOne()
-    @JoinColumn(name = "role_id")
+    @ManyToOne(fetch = FetchType.LAZY)
     private Role role;
+    
+    @Override
+    public String toString() {
+    	String msg = "id= %s, username= %s, first name= %s, last name= %s, email= %s, enable= %s";
+    	return String.format(msg, super.getId(), username, firstName, lastName, email, enable);
+    }
 }

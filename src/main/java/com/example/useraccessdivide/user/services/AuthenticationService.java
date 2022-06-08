@@ -3,11 +3,14 @@ package com.example.useraccessdivide.user.services;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.example.useraccessdivide.common.constant.CommonConstant;
 import com.example.useraccessdivide.common.exception.MyException;
 import com.example.useraccessdivide.user.entities.AuthenticationsEntity;
 import com.example.useraccessdivide.user.entities.User;
@@ -22,15 +25,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@Transactional
 public class AuthenticationService {
 	@Autowired
 	private UserRepository userRepository;
 
 	@Autowired
 	private AuthenticationRepository authenticationRepository;
-	
-	@Value("${user.authentication.loginFailedCount}")
-	private int loginFailedNumber;
 	
 	/**
 	 * <dd>Giải thích: tìm thông tin auth theo userId
@@ -104,7 +105,7 @@ public class AuthenticationService {
 			throw new MyException(HttpStatus.BAD_REQUEST, "0003", "MSG_W0002", "Tài khoản hoặc mật khẩu");
 		} else if (!user.isEnable()) {
 			throw new MyException(HttpStatus.BAD_REQUEST, "0005", "MSG_W0004");
-		} else if (authEntity.getAuthenticationCounter() >= loginFailedNumber) {
+		} else if (authEntity.getAuthenticationCounter() >= CommonConstant.LOGIN_FAILED_NUM) {
 			userRepository.updateEnableUser(user.getId(), false);
 			throw new MyException(HttpStatus.BAD_REQUEST, "0006", "MSG_W0005", loginFailedNumber);
 		}

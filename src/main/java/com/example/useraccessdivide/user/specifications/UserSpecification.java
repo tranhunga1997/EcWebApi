@@ -1,5 +1,6 @@
 package com.example.useraccessdivide.user.specifications;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +64,7 @@ public final class UserSpecification {
             conditionList.add(builder.equal(root.get(User_.EMAIL), form.getEmail()));
         }
         // thiết lập điều kiện (where)
-        conditionList.add(builder.or(builder.equal(root.get(User_.ENABLE),true),builder.equal(root.get(User_.ENABLE),false)));
+        // conditionList.add(builder.or(builder.equal(root.get(User_.ENABLE),true),builder.equal(root.get(User_.ENABLE),false)));
         criteriaQuery.select(root).where(builder.and(conditionList.toArray(new Predicate[0])));
 
         // thiết lập offset và limit
@@ -81,6 +82,7 @@ public final class UserSpecification {
      * @return
      */
     private long getTotalUser() {
-        return em.createQuery("SELECT COUNT(u) FROM User u", Long.class).getFirstResult();
+    	BigInteger result = (BigInteger) em.createNativeQuery("SELECT COUNT(*) FROM users").getSingleResult();
+        return result.longValue() ;
     }
 }

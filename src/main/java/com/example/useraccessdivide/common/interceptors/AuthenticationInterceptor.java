@@ -41,6 +41,10 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 		if (!user.isEnable()) {
 			throw new MyException(HttpStatus.UNAUTHORIZED, "0005", "MSG_W0004");
 		}
+		// kiểm tra refresh token
+		if(refreshTokenService.findById(refTokenId) == null) {
+			throw new MyException(HttpStatus.UNAUTHORIZED, "0005", "MSG_W0004");
+		}
 		return true;
 	}
 
