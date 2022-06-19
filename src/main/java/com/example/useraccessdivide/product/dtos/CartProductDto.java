@@ -1,11 +1,14 @@
 package com.example.useraccessdivide.product.dtos;
 
-import com.example.useraccessdivide.product.entities.ProductEntity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CartProductDto {
     private long userId;
-    private ProductEntity productInfo;
+    private ProductDto productInfo;
     private int quantity;
 }

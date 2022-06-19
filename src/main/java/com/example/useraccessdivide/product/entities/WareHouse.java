@@ -10,12 +10,17 @@ import java.time.LocalDateTime;
 @Table(name = "ware_houses")
 @Data
 public class WareHouse implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	@Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ware_house_seq")
+	@SequenceGenerator(sequenceName = "ware_house_seq", name = "ware_house_seq", allocationSize = 1)
     private long id;
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private ProductEntity product;
+    private Product product;
     @Column
     private int onMonthQuantity;
     @Column

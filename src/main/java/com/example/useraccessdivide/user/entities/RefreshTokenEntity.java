@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -19,7 +20,8 @@ import lombok.Data;
 @Data
 public class RefreshTokenEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rfToken_seq")
+	@SequenceGenerator(sequenceName = "rfToken_seq", name = "rfToken_seq", allocationSize = 1)
 	private Long id;
 	@Column(unique = true)
 	private String refreshToken;
@@ -31,7 +33,7 @@ public class RefreshTokenEntity {
 	private LocalDateTime expiryDatetime;
 	@Column
 	private LocalDateTime createDatetime = LocalDateTime.now();
-	@Column()
+	@Column
 	private LocalDateTime updateDatetime;
 	
 	public void setExpiryDatetime(int day) {

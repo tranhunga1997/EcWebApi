@@ -1,7 +1,7 @@
 package com.example.useraccessdivide.product.services;
 
 import com.example.useraccessdivide.common.utils.CommonUtils;
-import com.example.useraccessdivide.product.entities.BrandEntity;
+import com.example.useraccessdivide.product.entities.Brand;
 import com.example.useraccessdivide.product.repositories.BrandRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,20 +14,20 @@ public class BrandService {
     @Autowired
     BrandRepository brandRepository;
 
-    public Optional<BrandEntity> findById(long id){
+    public Optional<Brand> findById(long id){
         return brandRepository.findById(id);
     }
 
-    public Optional<BrandEntity> findbySlug(String slug){
+    public Optional<Brand> findbySlug(String slug){
         return brandRepository.findBySlug(slug);
     }
 
-    public BrandEntity save(BrandEntity entity){
+    public Brand save(Brand entity){
         entity.setSlug(CommonUtils.toSlug(entity.getName()));
         return brandRepository.save(entity);
     }
 
-    public List<BrandEntity> saveAll(Iterable<BrandEntity> entities){
+    public List<Brand> saveAll(Iterable<Brand> entities){
         entities.forEach(e -> {
             e.setSlug(CommonUtils.toSlug(e.getName()));
         });

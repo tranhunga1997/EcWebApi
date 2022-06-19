@@ -10,9 +10,14 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "cart_histories")
 @Data
-public class CartHistoryEntity implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class CartHistory implements Serializable {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	@Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cart_history_seq")
+	@SequenceGenerator(sequenceName = "cart_history_seq", name = "cart_history_seq", allocationSize = 1)
     private long id;
     @Column(nullable = false)
     private long userId;

@@ -9,8 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.example.useraccessdivide.common.exception.MyException;
 import com.example.useraccessdivide.common.utils.CommonUtils;
-import com.example.useraccessdivide.product.entities.ProductImportEntity;
+import com.example.useraccessdivide.product.entities.ProductImport;
 import com.example.useraccessdivide.product.forms.ProductImportForm;
 import com.example.useraccessdivide.product.repositories.ProductImportRepository;
 
@@ -21,19 +22,24 @@ public class ProductImportService {
 	@Autowired
 	private ProductService productService;
 	
-	public ProductImportEntity save(ProductImportForm form) {
-		ProductImportEntity entity = new ProductImportEntity();
-		entity.setProduct(productService.findById(form.getProductId()).get());
+	public ProductImport save(ProductImportForm form) throws MyException {
+		ProductImport entity = new ProductImport();
+		entity.setProduct(productService.findById(form.getProductId()));
 		entity.setQuantity(form.getQuantity());
 		entity.setStoringDatetime(LocalDateTime.now());
 		return productImportRepository.saveAndFlush(entity);
 	}
 	
-	public List<ProductImportEntity> saveAll(List<ProductImportForm> forms){
-		List<ProductImportEntity> entities = new ArrayList<ProductImportEntity>();
+	public List<ProductImport> saveAll(List<ProductImportForm> forms){
+		List<ProductImport> entities = new ArrayList<ProductImport>();
 		forms.forEach(e -> {
-			ProductImportEntity entity = new ProductImportEntity();
-			entity.setProduct(productService.findById(e.getProductId()).get());
+			ProductImport entity = new ProductImport();
+			try {
+				entity.setProduct(productService.findById(e.getProductId()));
+			} catch (MyException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			entity.setQuantity(e.getQuantity());
 			entity.setStoringDatetime(LocalDateTime.now());
 			entities.add(entity);
@@ -50,15 +56,15 @@ public class ProductImportService {
 		return productImportRepository.getTotalQuantityProductOnYearMonth(productId, year, month);
 	}
 	
-	public Page<ProductImportEntity> getAllProductImport(int year, Pageable pageable){
+	public Page<ProductImport> getAllProductImport(int year, Pageable pageable){
 		return productImportRepository.getAllProductImport(year, pageable);
 	}
 	
-	public Page<ProductImportEntity> getAllProductImport(int year, int month, Pageable pageable){
+	public Page<ProductImport> getAllProductImport(int year, int month, Pageable pageable){
 		return productImportRepository.getAllProductImport(year, month, pageable);
 	}
 	
-	public Page<ProductImportEntity> getContainsProductName(String productName, Pageable pageable){
+	public Page<ProductImport> getContainsProductName(String productName, Pageable pageable){
 		return productImportRepository.findByProductNameLikeIgnoreCase(productName, pageable);
 	}
 }

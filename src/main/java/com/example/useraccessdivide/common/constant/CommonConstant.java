@@ -1,6 +1,7 @@
 package com.example.useraccessdivide.common.constant;
 
 public class CommonConstant {
+	/* TODO COMMON VARIABLE USER MANAGE */
 	public static final String VIEW_ROLE_PER = "view-role-info";
 	public static final String CREATE_ROLE_PER = "create-role-info";
 	public static final String UPDATE_ROLE_PER = "update-role-info";

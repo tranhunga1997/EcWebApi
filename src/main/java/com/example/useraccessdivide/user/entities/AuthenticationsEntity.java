@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -21,7 +22,8 @@ public class AuthenticationsEntity implements Serializable {
 
 	private static final long serialVersionUID = 3731825700751979127L;
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "auth_seq")
+	@SequenceGenerator(sequenceName = "auth_seq", name = "auth_seq", allocationSize = 1)
 	private int id;
 	@Column(nullable = false)
 	private int historyId;

@@ -1,0 +1,10 @@
+INSERT INTO roles_permissions (role_id,permission_id) VALUES (2,1);
+INSERT INTO roles_permissions (role_id,permission_id) VALUES (2,2);
+INSERT INTO roles_permissions (role_id,permission_id) VALUES (2,3);
+INSERT INTO roles_permissions (role_id,permission_id) VALUES (2,4);
+INSERT INTO roles_permissions (role_id,permission_id) VALUES (2,5);
+INSERT INTO roles_permissions (role_id,permission_id) VALUES (2,6);
+INSERT INTO roles_permissions (role_id,permission_id) VALUES (2,7);
+INSERT INTO roles_permissions (role_id,permission_id) VALUES (2,8);
+INSERT INTO roles_permissions (role_id,permission_id) VALUES (2,9);
+INSERT INTO roles_permissions (role_id,permission_id) VALUES (2,10);

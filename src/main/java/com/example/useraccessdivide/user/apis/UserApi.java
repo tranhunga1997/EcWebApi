@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -89,12 +90,6 @@ public class UserApi {
 	private RefreshTokenService refreshTokenService;
 	@Autowired
 	private AuthenticationService authService;
-
-	/**
-	 * <dd>Giải thích: giới hạn số lượng đăng nhập
-	 */
-	@Value("${user.authentication.loginFailedCount}")
-	private int loginFailedCount;
 	/**
 	 * <dd>Giải thích: role id mặc định khi tạo tài khoản.
 	 */
@@ -275,12 +270,14 @@ public class UserApi {
 		checkPermission(CommonConstant.VIEW_USER_PER, TokenProvider.getUsername(request));
 		
 		Page<User> userPage = userSpecification.filter(userForm, PageRequest.of(page - 1, CommonConstant.PAGE_SIZE));
-		List<UserDto> userDtos = new ArrayList<UserDto>();
-		userPage.stream().forEach(u -> {
+		List<UserDto> userDtos = userPage.stream().map(u -> {
 			UserDto dto = new UserDto();
-			BeanUtils.copyProperties(u, dto);
-			userDtos.add(dto);
-		});
+			dto.setId(u.getId());
+			dto.setUsername(u.getUsername());
+			dto.setFirstName(u.getFirstName());
+			dto.setLastName(u.getLastName());
+			return dto;
+		}).collect(Collectors.toList());
 		return ResponseEntity
 				.ok(new Pagingation<>(userDtos, userPage.getTotalElements(), userPage.getTotalPages()));
 	}

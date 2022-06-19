@@ -1,0 +1,11 @@
+id,create_datetime,update_datetime,permission_key,permission_name,
+,NOW(),,view-role-info,xem th?ng tin role,"INSERT INTO permissions (id,create_datetime,permission_key,permission_name) VALUES (NEXTVAL('permission_seq'),NOW(),'view-role-info','xem th?ng tin role');"
+,NOW(),,create-role-info,th?m th?ng tin role m?i,"INSERT INTO permissions (id,create_datetime,permission_key,permission_name) VALUES (NEXTVAL('permission_seq'),NOW(),'create-role-info','th?m th?ng tin role m?i');"
+,NOW(),,update-role-info,s?a th?ng tin role,"INSERT INTO permissions (id,create_datetime,permission_key,permission_name) VALUES (NEXTVAL('permission_seq'),NOW(),'update-role-info','s?a th?ng tin role');"
+,NOW(),,delete-role-info,x?a th?ng tin role,"INSERT INTO permissions (id,create_datetime,permission_key,permission_name) VALUES (NEXTVAL('permission_seq'),NOW(),'delete-role-info','x?a th?ng tin role');"
+,NOW(),,user-block-status-change,kh?a v? m? kh?a t?i kho?n,"INSERT INTO permissions (id,create_datetime,permission_key,permission_name) VALUES (NEXTVAL('permission_seq'),NOW(),'user-block-status-change','kh?a v? m? kh?a t?i kho?n');"
+,NOW(),,view-user-info,xem th?ng tin t?i kho?n,"INSERT INTO permissions (id,create_datetime,permission_key,permission_name) VALUES (NEXTVAL('permission_seq'),NOW(),'view-user-info','xem th?ng tin t?i kho?n');"
+,NOW(),,view-permission-info,xem th?ng tin permission,"INSERT INTO permissions (id,create_datetime,permission_key,permission_name) VALUES (NEXTVAL('permission_seq'),NOW(),'view-permission-info','xem th?ng tin permission');"
+,NOW(),,add-new-product-info,th?m th?ng tin s?n ph?m m?i,"INSERT INTO permissions (id,create_datetime,permission_key,permission_name) VALUES (NEXTVAL('permission_seq'),NOW(),'add-new-product-info','th?m th?ng tin s?n ph?m m?i');"
+,NOW(),,delete-product-info,x?a th?ng tin s?n ph?m,"INSERT INTO permissions (id,create_datetime,permission_key,permission_name) VALUES (NEXTVAL('permission_seq'),NOW(),'delete-product-info','x?a th?ng tin s?n ph?m');"
+,NOW(),,update-product-info,s?a th?ng tin s?n ph?m,"INSERT INTO permissions (id,create_datetime,permission_key,permission_name) VALUES (NEXTVAL('permission_seq'),NOW(),'update-product-info','s?a th?ng tin s?n ph?m');"

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.useraccessdivide.product.dtos.PageDto;
-import com.example.useraccessdivide.product.entities.CartHistoryEntity;
+import com.example.useraccessdivide.product.entities.CartHistory;
 import com.example.useraccessdivide.product.services.CartHistoryService;
 
 import io.swagger.annotations.Api;
@@ -27,8 +27,8 @@ public class BuyItemHistoryApi {
     @ApiOperation(value = "Xem lịch sử mua hàng")
     @GetMapping
     ResponseEntity<PageDto> viewHistory(long userId, int currentPage){
-        Page<CartHistoryEntity> cartHistoryEntityPage = cartHistoryService.findByUserId(userId, currentPage-1, 2, Sort.by(Sort.Order.asc("boughtDatetime")));
-        PageDto<CartHistoryEntity> pageDto = PageDto.<CartHistoryEntity>builder()
+        Page<CartHistory> cartHistoryEntityPage = cartHistoryService.findByUserId(userId, currentPage-1, 2, Sort.by(Sort.Order.asc("boughtDatetime")));
+        PageDto<CartHistory> pageDto = PageDto.<CartHistory>builder()
                 .datas(cartHistoryEntityPage.toList())
                 .totalPages(cartHistoryEntityPage.getTotalPages())
                 .totalElements(cartHistoryEntityPage.getTotalElements())

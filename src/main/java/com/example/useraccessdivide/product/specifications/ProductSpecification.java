@@ -17,9 +17,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.example.useraccessdivide.common.Pagingation;
-import com.example.useraccessdivide.product.entities.BrandEntity;
-import com.example.useraccessdivide.product.entities.CategoryEntity;
-import com.example.useraccessdivide.product.entities.ProductEntity;
+import com.example.useraccessdivide.product.entities.Brand;
+import com.example.useraccessdivide.product.entities.Category;
+import com.example.useraccessdivide.product.entities.Product;
 import com.example.useraccessdivide.product.entities.meta.ProductSearch_;
 import com.example.useraccessdivide.product.forms.ProductSearchForm;
 import com.example.useraccessdivide.product.services.BrandService;
@@ -34,14 +34,14 @@ public final class ProductSpecification {
     @Autowired
     private BrandService brandService;
 
-    public List<ProductEntity> findAll(){
+    public List<Product> findAll(){
         try {
             CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-            CriteriaQuery<ProductEntity> criteriaQuery = builder.createQuery(ProductEntity.class);
-            Root<ProductEntity> root = criteriaQuery.from(ProductEntity.class);
+            CriteriaQuery<Product> criteriaQuery = builder.createQuery(Product.class);
+            Root<Product> root = criteriaQuery.from(Product.class);
             criteriaQuery.select(root).orderBy(builder.desc(root.get("id")));
 
-            TypedQuery<ProductEntity> result = entityManager.createQuery(criteriaQuery);
+            TypedQuery<Product> result = entityManager.createQuery(criteriaQuery);
             return result.getResultList();
         }catch (Exception e){
             e.printStackTrace();
@@ -50,10 +50,10 @@ public final class ProductSpecification {
 
     }
 
-    public Pagingation<ProductEntity> filter(ProductSearchForm form, int currentPage){
+    public Pagingation<Product> filter(ProductSearchForm form, int currentPage){
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<ProductEntity> query = builder.createQuery(ProductEntity.class);
-        Root<ProductEntity> root = query.from(ProductEntity.class);
+        CriteriaQuery<Product> query = builder.createQuery(Product.class);
+        Root<Product> root = query.from(Product.class);
         List<Predicate> conditionList = new ArrayList<>();
 
         if(form != null) {
@@ -74,12 +74,12 @@ public final class ProductSpecification {
             }
 
             if (StringUtils.hasText(form.getCategorySlug())) {
-                CategoryEntity entity = categoryService.findBySlug(form.getCategorySlug()).get();
+                Category entity = categoryService.findBySlug(form.getCategorySlug()).get();
                 conditionList.add(builder.equal(root.get(ProductSearch_.CATEGORY), entity));
             }
 
             if (StringUtils.hasText(form.getBrandSlug())) {
-                BrandEntity entity = brandService.findbySlug(form.getBrandSlug()).get();
+                Brand entity = brandService.findbySlug(form.getBrandSlug()).get();
                 conditionList.add(builder.equal(root.get(ProductSearch_.BRAND), entity));
             }
         }
@@ -93,10 +93,10 @@ public final class ProductSpecification {
         }
         int limit = 2;
     	int offSet = (currentPage - 1)*limit;
-        TypedQuery<ProductEntity> result = entityManager.createQuery(query);
-        List<ProductEntity> resultList = result.getResultList();
+        TypedQuery<Product> result = entityManager.createQuery(query);
+        List<Product> resultList = result.getResultList();
         
-        Pagingation<ProductEntity> page = new Pagingation<ProductEntity>();
+        Pagingation<Product> page = new Pagingation<Product>();
         page.setDatas(resultList.stream().skip(offSet).limit(limit).collect(Collectors.toList()));
         page.setTotalElement(resultList.size());
         page.setTotalPage(Math.round(resultList.size()/limit));

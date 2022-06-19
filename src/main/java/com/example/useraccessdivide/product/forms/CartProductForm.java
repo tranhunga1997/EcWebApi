@@ -1,6 +1,6 @@
 package com.example.useraccessdivide.product.forms;
 
-import com.example.useraccessdivide.product.entities.ProductEntity;
+import com.example.useraccessdivide.product.entities.Product;
 
 import lombok.Data;
 

@@ -1,7 +1,7 @@
 package com.example.useraccessdivide.product.services;
 
 import com.example.useraccessdivide.product.dtos.CartHistoryDto;
-import com.example.useraccessdivide.product.entities.CartHistoryEntity;
+import com.example.useraccessdivide.product.entities.CartHistory;
 import com.example.useraccessdivide.product.forms.CartHistoryForm;
 import com.example.useraccessdivide.product.repositories.CartHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +19,14 @@ public class CartHistoryService {
     @Autowired
     CartHistoryRepository cartHistoryRepository;
 
-    public Page<CartHistoryEntity> findByUserId(long id, int currentPage,int pageSize, Sort sort){
+    public Page<CartHistory> findByUserId(long id, int currentPage,int pageSize, Sort sort){
         return cartHistoryRepository.findByUserId(id, PageRequest.of(currentPage, pageSize, sort));
     }
 
     public void saveAll(List<CartHistoryForm> forms){
-        List<CartHistoryEntity> cartHistoryEntityList = new ArrayList<>();
+        List<CartHistory> cartHistoryEntityList = new ArrayList<>();
         forms.forEach(e -> {
-            CartHistoryEntity entity = new CartHistoryEntity();
+            CartHistory entity = new CartHistory();
             entity.setUserId(e.getUserId());
             entity.setProductName(e.getProductName());
             entity.setPrice(e.getPrice());

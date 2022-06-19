@@ -8,11 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
-import com.example.useraccessdivide.product.entities.CartItemEntity;
+import com.example.useraccessdivide.product.entities.CartItem;
+import com.example.useraccessdivide.product.entities.CartItemPK;
 
 @Repository
-public interface CartRepository extends JpaRepository<CartItemEntity, Long> {
-    Page<CartItemEntity> findByUserId(long userId, Pageable pageable);
+public interface CartRepository extends JpaRepository<CartItem, CartItemPK> {
+    Page<CartItem> findByUserId(long userId, Pageable pageable);
     @Transactional @Modifying
     void deleteByUserIdAndProductId(long userId, long productId);
     @Transactional @Modifying
