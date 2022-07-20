@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/buy-item-history")
+@RequestMapping("/api/v1/buy-item-history")
 @Api(value = "Purchase history", tags = {"api lịch sử mua hàng"})
 public class BuyItemHistoryApi {
     @Autowired

@@ -40,7 +40,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/v1/product")
 @Api(value = "Product api", tags = { "api sản phẩm" })
 public class ProductApi {
 

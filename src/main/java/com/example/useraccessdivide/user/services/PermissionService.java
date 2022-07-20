@@ -27,10 +27,11 @@ public class PermissionService {
 
     public Permission findById(long id) throws MyException{
     	Optional<Permission> optional = permissionRepository.findById(id);
-    	if(optional.isEmpty()) {
-    		throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "Thông tin permission");
-    	}
-        return optional.get();
+//    	if(optional.isEmpty()) {
+//    		throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "Thông tin permission");
+//    	}
+		return optional.orElseThrow(
+				() -> new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "Thông tin permission"));
     }
 
     public List<Permission> findByIds(List<Long> permissionIdList){

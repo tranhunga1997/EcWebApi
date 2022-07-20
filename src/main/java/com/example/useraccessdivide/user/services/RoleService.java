@@ -18,33 +18,36 @@ import javax.transaction.Transactional;
 @Service
 @Transactional
 public class RoleService {
-    @Autowired
-    private RoleRepository roleRepository;
+	@Autowired
+	private RoleRepository roleRepository;
 
-    public Page<Role> findAll(Pageable pageable){
-        return roleRepository.findAll(pageable);
-    }
-    
-    public Page<Role> findByName(String roleName, Pageable pageable) {
-    	return roleRepository.findByRoleNameIsLike("%" + roleName + "%", pageable);
-    }
-    
-    public Role findById(long id) throws MyException{
-    	Optional<Role> optional = roleRepository.findById(id);
-    	if(optional.isEmpty()) { 
-    		throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin role");
-    	}
-    	
-        return optional.get();
-    }
-    public void saveAllAndFlush(List<Role> list){
-        roleRepository.saveAllAndFlush(list);
-    }
-    public Role save(Role role){
-        return roleRepository.save(role);
-    }
+	public Page<Role> findAll(Pageable pageable) {
+		return roleRepository.findAll(pageable);
+	}
 
-    public void delete(long id) throws MyException {
-        roleRepository.delete(findById(id));
-    }
+	public Page<Role> findByName(String roleName, Pageable pageable) {
+		return roleRepository.findByRoleNameIsLike("%" + roleName + "%", pageable);
+	}
+
+	public Role findById(long id) throws MyException {
+		Optional<Role> optional = roleRepository.findById(id);
+//    	if(optional.isEmpty()) { 
+//    		throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin role");
+//    	}
+
+		return optional
+				.orElseThrow(() -> new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin role"));
+	}
+
+	public void saveAllAndFlush(List<Role> list) {
+		roleRepository.saveAllAndFlush(list);
+	}
+
+	public Role save(Role role) {
+		return roleRepository.save(role);
+	}
+
+	public void delete(long id) throws MyException {
+		roleRepository.delete(findById(id));
+	}
 }

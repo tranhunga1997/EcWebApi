@@ -20,71 +20,76 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private RoleRepository roleRepository;
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private RoleRepository roleRepository;
 
-    public User findById(long id) throws MyException{
-    	Optional<User> optional = userRepository.findById(id);
-    	if(optional.isEmpty()) {
-    		throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản");
-    	}
-        return optional.get();
-    }
+	public User findById(long id) throws MyException {
+		Optional<User> optional = userRepository.findById(id);
+//    	if(optional.isEmpty()) {
+//    		throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản");
+//    	}
+		return optional
+				.orElseThrow(() -> new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản"));
+	}
 
-    public User findByUsername(String username) throws MyException {
-    	Optional<User> optional = userRepository.findByUsername(username);
-    	if(optional.isEmpty()) {
-    		throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản");
-    	}
-    	return optional.get();
-    }
-    
-    public Page<User> findAll(Pageable pageable) {
-    	return userRepository.findAll(pageable);
-    }
-    
-    public User saveAndFlush(User user){
-        user.setUpdateDatetime(LocalDateTime.now());
-        user.setEnable(true);
-        if(user.getRole() == null)
-            user.setRole(roleRepository.findByRoleKey("user"));
-        return userRepository.saveAndFlush(user);
-    }
+	public User findByUsername(String username) throws MyException {
+		Optional<User> optional = userRepository.findByUsername(username);
+//		if (optional.isEmpty()) {
+//			throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản");
+//		}
+		return optional
+				.orElseThrow(() -> new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản"));
+	}
 
-    public void updateUser(User user){
-        userRepository.updateUser(user);
-    }
+	public Page<User> findAll(Pageable pageable) {
+		return userRepository.findAll(pageable);
+	}
 
-    public void saveAllAndFlush(List<User> userList){
-        userList.forEach(u ->{
-            u.setUpdateDatetime(LocalDateTime.now());
-        });
-        userRepository.saveAllAndFlush(userList);
-    }
-    /**
-     * false: khóa, true: không khóa 
-     * @param id
-     * @param enable
-     */
-    public void blockAndUnblock(long id, boolean isEnable){
-        userRepository.updateEnableUser(id,isEnable);
-    }
+	public User saveAndFlush(User user) {
+		user.setUpdateDatetime(LocalDateTime.now());
+		user.setEnable(true);
+		if (user.getRole() == null)
+			user.setRole(roleRepository.findByRoleKey("user"));
+		return userRepository.saveAndFlush(user);
+	}
 
-    public boolean isUserExists(String username){
-        Optional<User> user = userRepository.findByUsername(username);
-        if(user.isPresent()){
-            return true;
-        }
-        return false;
-    }
+	public void updateUser(User user) {
+		userRepository.updateUser(user);
+	}
 
-    public User findByEmail(String email) throws MyException{
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        if(userOptional.isEmpty()){
-            throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản");
-        }
-        return userOptional.get();
-    }
+	public void saveAllAndFlush(List<User> userList) {
+		userList.forEach(u -> {
+			u.setUpdateDatetime(LocalDateTime.now());
+		});
+		userRepository.saveAllAndFlush(userList);
+	}
+
+	/**
+	 * false: khóa, true: không khóa
+	 * 
+	 * @param id
+	 * @param enable
+	 */
+	public void blockAndUnblock(long id, boolean isEnable) {
+		userRepository.updateEnableUser(id, isEnable);
+	}
+
+	public boolean isUserExists(String username) {
+		Optional<User> userOptional = userRepository.findByUsername(username);
+		if (userOptional.isPresent()) {
+			return true;
+		}
+		return false;
+	}
+
+	public User findByEmail(String email) throws MyException {
+		Optional<User> userOptional = userRepository.findByEmail(email);
+//		if (userOptional.isEmpty()) {
+//			throw new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản");
+//		}
+		return userOptional
+				.orElseThrow(() -> new MyException(HttpStatus.BAD_REQUEST, "0004", "MSG_W0003", "thông tin tài khoản"));
+	}
 }

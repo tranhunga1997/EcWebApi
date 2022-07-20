@@ -24,7 +24,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping("/api/cart")
+@RequestMapping("/api/v1/cart")
 @Api(value = "Cart api", tags = {"api giỏ hàng"})
 public class CartApi {
     @Autowired

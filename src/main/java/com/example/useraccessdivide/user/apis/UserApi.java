@@ -75,7 +75,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 @Api(value = "User Api", tags = { "api tài khoản" })
 public class UserApi {
 	@Autowired
@@ -113,10 +113,7 @@ public class UserApi {
 		}
 		Role role = roleService.findById(defaultRoleId);
 		User user = new User();
-		user.setUsername(form.getUsername());
-		user.setEmail(form.getEmail());
-		user.setFirstName(form.getFirstName());
-		user.setLastName(form.getLastName());
+		BeanUtils.copyProperties(form, user);
 		user.setRole(role);
 		user.setCreateDatetime(LocalDateTime.now());
 		User authenticationUser = userService.saveAndFlush(user);

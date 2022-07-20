@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/product/import")
+@RequestMapping("/api/v1/product/import")
 public class ProductImportApi {
 
 	@PostMapping
