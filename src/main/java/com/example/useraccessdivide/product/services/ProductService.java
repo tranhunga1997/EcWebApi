@@ -5,11 +5,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.useraccessdivide.common.exception.MyException;
 import com.example.useraccessdivide.common.utils.CommonUtils;
+import com.example.useraccessdivide.common.utils.FileUtil;
 import com.example.useraccessdivide.product.entities.Category;
 import com.example.useraccessdivide.product.entities.Product;
 import com.example.useraccessdivide.product.exceptions.ImageNotExtensionException;
@@ -137,6 +143,52 @@ public class ProductService {
 	 */
 	public Product save(Product product) {
 		return productRepository.save(product);
+	}
+	
+	public void saveProductWithCsv(MultipartFile file, boolean isHeader) throws MyException {
+		// kiểm tra định dang csv
+		Predicate<String> extensionPredicate = fileName -> fileName.endsWith(".csv"); 
+		if(!FileUtil.checkExtension(file.getOriginalFilename(), extensionPredicate)) {
+			throw new MyException(HttpStatus.BAD_REQUEST, "0009", "MSG_W0010");
+		}
+		
+		// đọc nội dung file
+		List<String> rawContents = new ArrayList<String>();
+		try {
+			BufferedInputStream bis = new BufferedInputStream(file.getInputStream());
+			StringBuffer content = new StringBuffer();
+			int c;
+			while((c = bis.read()) != -1) {
+				content.append((char) c);
+			}
+			rawContents = Arrays.asList(content.toString().split("\\r\\n"));
+		Stream<String> strStream = rawContents.stream();
+		// kiểm tra header
+		if(isHeader) {
+			strStream = strStream.skip(1);
+		}
+		
+		// xử lý nội dung
+		List<Product> products = strStream.map(str -> {
+			String[] strs = str.split("[,]");
+			Product product = new Product();
+			product.setName(strs[0]);
+			product.setSlug(CommonUtils.toSlug(product.getName()));
+			product.setPrice(Integer.parseInt(strs[1]));
+			product.setShortDescription(strs[2]);
+			product.setDescription(strs[3]);
+			product.setStartDatetime(LocalDateTime.parse(strs[4], DateTimeFormatter.ofPattern("yyyy/M/dd H:mm")));
+			product.setCategoryId(Long.parseLong(strs[5]));
+			product.setBrandId(Long.parseLong(strs[6]));
+			product.setCreateDatetime(LocalDateTime.now());
+			return product;
+		}).collect(Collectors.toList());
+		productRepository.saveAll(products);
+		} catch (IOException | RuntimeException e) {
+			e.printStackTrace();
+			throw new MyException(HttpStatus.BAD_REQUEST, "0011", "MSG_W0011");
+		}
+		
 	}
 
 	@Deprecated

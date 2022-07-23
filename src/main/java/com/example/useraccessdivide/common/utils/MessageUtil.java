@@ -15,6 +15,8 @@ public class MessageUtil {
 
 	private static MessageSource messageSource = null;
 	
+	private MessageUtil() {}
+	
 	/**
 	 * khởi tạo message source
 	 * @param context

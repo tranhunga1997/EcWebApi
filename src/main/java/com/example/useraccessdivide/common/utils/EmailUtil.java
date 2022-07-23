@@ -25,6 +25,8 @@ public class EmailUtil {
     private static JavaMailSender javaMailSender;
     private static TemplateEngine templateEngine;
 
+    private EmailUtil() {}
+    
     public static void sendTextMail(String toEmail, String subject, String message){
         MailMessage mailMessage = new SimpleMailMessage();
 
