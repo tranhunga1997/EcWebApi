@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.useraccessdivide.common.Pagingation;
 import com.example.useraccessdivide.common.exception.MyException;
@@ -92,6 +93,11 @@ public class ProductApi {
 		} catch (ImageNotExtensionException e) {
 			throw new MyException(HttpStatus.BAD_REQUEST, "0009", "MSG_W0008");
 		}
+	}
+	
+	ResponseEntity<?> createProductWithCsv(MultipartFile file, boolean isHeader) throws MyException {
+		productService.saveProductWithCsv(file, isHeader);
+		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
 	@ApiOperation(value = "Xem chi tiết sản phẩm")

@@ -121,7 +121,8 @@ public class ProductService {
 //		if (productOptional.isEmpty()) {
 //			throw new MyException(HttpStatus.BAD_REQUEST, "0008", "MSG_W0003", "thông tin sản phẩm");
 //		}
-		return productOptional.orElseThrow(() -> new MyException(HttpStatus.BAD_REQUEST, "0008", "MSG_W0003", "thông tin sản phẩm"));
+		return productOptional
+				.orElseThrow(() -> new MyException(HttpStatus.BAD_REQUEST, "0008", "MSG_W0003", "thông tin sản phẩm"));
 	}
 
 	/**
@@ -144,51 +145,70 @@ public class ProductService {
 	public Product save(Product product) {
 		return productRepository.save(product);
 	}
-	
+
 	public void saveProductWithCsv(MultipartFile file, boolean isHeader) throws MyException {
 		// kiểm tra định dang csv
-		Predicate<String> extensionPredicate = fileName -> fileName.endsWith(".csv"); 
-		if(!FileUtil.checkExtension(file.getOriginalFilename(), extensionPredicate)) {
+		Predicate<String> extensionPredicate = fileName -> fileName.endsWith(".csv");
+		if (!FileUtil.checkExtension(file.getOriginalFilename(), extensionPredicate)) {
 			throw new MyException(HttpStatus.BAD_REQUEST, "0009", "MSG_W0010");
 		}
-		
+
 		// đọc nội dung file
 		List<String> rawContents = new ArrayList<String>();
 		try {
 			BufferedInputStream bis = new BufferedInputStream(file.getInputStream());
 			StringBuffer content = new StringBuffer();
 			int c;
-			while((c = bis.read()) != -1) {
+			while ((c = bis.read()) != -1) {
 				content.append((char) c);
 			}
 			rawContents = Arrays.asList(content.toString().split("\\r\\n"));
-		Stream<String> strStream = rawContents.stream();
-		// kiểm tra header
-		if(isHeader) {
-			strStream = strStream.skip(1);
-		}
-		
-		// xử lý nội dung
-		List<Product> products = strStream.map(str -> {
-			String[] strs = str.split("[,]");
-			Product product = new Product();
-			product.setName(strs[0]);
-			product.setSlug(CommonUtils.toSlug(product.getName()));
-			product.setPrice(Integer.parseInt(strs[1]));
-			product.setShortDescription(strs[2]);
-			product.setDescription(strs[3]);
-			product.setStartDatetime(LocalDateTime.parse(strs[4], DateTimeFormatter.ofPattern("yyyy/M/dd H:mm")));
-			product.setCategoryId(Long.parseLong(strs[5]));
-			product.setBrandId(Long.parseLong(strs[6]));
-			product.setCreateDatetime(LocalDateTime.now());
-			return product;
-		}).collect(Collectors.toList());
-		productRepository.saveAll(products);
+			Stream<String> strStream = rawContents.stream();
+			// kiểm tra header
+			if (isHeader) {
+				strStream = strStream.skip(1);
+			}
+
+			// xử lý nội dung
+			List<Product> products = strStream.map(str -> {
+				String[] strs = str.split("[,]");
+				Product product = new Product();
+				product.setName(strs[0]);
+				product.setSlug(CommonUtils.toSlug(product.getName()));
+				product.setPrice(Integer.parseInt(strs[1]));
+				product.setShortDescription(strs[2]);
+				product.setDescription(strs[3]);
+				product.setStartDatetime(LocalDateTime.parse(strs[4], DateTimeFormatter.ofPattern("yyyy/M/dd H:mm")));
+				product.setCategoryId(Long.parseLong(strs[5]));
+				product.setBrandId(Long.parseLong(strs[6]));
+				product.setCreateDatetime(LocalDateTime.now());
+				return product;
+			}).collect(Collectors.toList());
+			productRepository.saveAll(products);
 		} catch (IOException | RuntimeException e) {
 			e.printStackTrace();
 			throw new MyException(HttpStatus.BAD_REQUEST, "0011", "MSG_W0011");
 		}
-		
+
+	}
+
+	/**
+	 * Lưu hình ảnh <br/>
+	 * tên hình ảnh đặt theo product slug
+	 * 
+	 * @param multipartFile
+	 * @param productSlug
+	 * @return tên hình ảnh + định dạng
+	 * @throws IOException
+	 * @throws ImageNotExtensionException
+	 */
+	public String saveImageFile(MultipartFile multipartFile, String productSlug)
+			throws IOException, ImageNotExtensionException {
+		String extension = getImageExtension(multipartFile.getOriginalFilename());
+		String fileName = productSlug + "." + extension;
+		File file = new File(getPathImage(fileName));
+		FileCopyUtils.copy(multipartFile.getBytes(), file);
+		return fileName;
 	}
 
 	@Deprecated
@@ -221,21 +241,6 @@ public class ProductService {
 	}
 
 	/**
-	 * Kiểm tra đuôi định dạng hình ảnh
-	 * 
-	 * @param fileName
-	 * @return {@code true} là định dạng hình ảnh, {@code false} không phải định
-	 *         dạng hình ảnh
-	 */
-	public boolean isImage(String fileName) {
-		if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".png")
-				|| fileName.endsWith(".svg")) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
 	 * tạo đường dẫn hình ảnh từ tên ảnh
 	 * 
 	 * @param fileName
@@ -244,6 +249,20 @@ public class ProductService {
 	private String getPathImage(String fileName) {
 		File file = new File(rootPath, fileName);
 		return file.getAbsolutePath();
+	}
+
+	/**
+	 * Kiểm tra đuôi định dạng hình ảnh
+	 * 
+	 * @param fileName
+	 * @return {@code true} là định dạng hình ảnh, {@code false} không phải định
+	 *         dạng hình ảnh
+	 */
+	private boolean isImage(String fileName) {
+		Predicate<String> predicate = file -> file.endsWith(".jpg") || file.endsWith(".jpeg") || file.endsWith(".png")
+				|| file.endsWith(".svg");
+		
+		return FileUtil.checkExtension(fileName, predicate);
 	}
 
 	/**
@@ -276,24 +295,5 @@ public class ProductService {
 		}
 		String[] splits = fileName.split("\\.");
 		return splits[splits.length - 1];
-	}
-
-	/**
-	 * Lưu hình ảnh <br/>
-	 * tên hình ảnh đặt theo product slug
-	 * 
-	 * @param multipartFile
-	 * @param productSlug
-	 * @return tên hình ảnh + định dạng
-	 * @throws IOException
-	 * @throws ImageNotExtensionException
-	 */
-	public String saveImageFile(MultipartFile multipartFile, String productSlug)
-			throws IOException, ImageNotExtensionException {
-		String extension = getImageExtension(multipartFile.getOriginalFilename());
-		String fileName = productSlug + "." + extension;
-		File file = new File(getPathImage(fileName));
-		FileCopyUtils.copy(multipartFile.getBytes(), file);
-		return fileName;
 	}
 }

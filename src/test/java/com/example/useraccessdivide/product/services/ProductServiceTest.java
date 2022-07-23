@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.useraccessdivide.common.exception.MyException;
 
-@SpringBootTest
+//@SpringBootTest
 class ProductServiceTest {
 	
 	@Autowired
@@ -26,7 +26,7 @@ class ProductServiceTest {
 		byte[] bs = service.getByteImage("coca-cola.jpg");
 	}
 	
-	@Test
+//	@Test
 	void testAddProductWithCsv() throws IOException, MyException {
 		FileInputStream fis = new FileInputStream(new File("C:\\Users\\tranh\\Desktop\\product.csv"));
 		MultipartFile multipartFile = new MockMultipartFile("product", "product.csv", null, fis.readAllBytes());
