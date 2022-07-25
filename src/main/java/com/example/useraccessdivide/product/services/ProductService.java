@@ -5,16 +5,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.useraccessdivide.common.exception.MyException;
@@ -32,7 +28,6 @@ import com.example.useraccessdivide.common.utils.FileUtil;
 import com.example.useraccessdivide.product.entities.Category;
 import com.example.useraccessdivide.product.entities.Product;
 import com.example.useraccessdivide.product.exceptions.ImageNotExtensionException;
-import com.example.useraccessdivide.product.forms.ProductForm;
 import com.example.useraccessdivide.product.repositories.ProductRepository;
 
 @Service
@@ -42,18 +37,25 @@ public class ProductService {
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
-	private BrandService brandService;
-	@Autowired
 	private CategoryService categoryService;
 
 	/**
-	 * Xem tất cả thông tin sản phẩm
+	 * Tìm tất cả thông tin sản phẩm
 	 * 
 	 * @param pageable
 	 * @return thông tin sản phẩm
 	 */
 	private Page<Product> findAll(Pageable pageable) {
 		return productRepository.findAll(pageable);
+	}
+	
+	/**
+	 * Tìm thông tin sản phẩm
+	 * @param ids danh sách id
+	 * @return danh sách sản phẩm
+	 */
+	public List<Product> findAllById(List<Long> ids) {
+		return productRepository.findAllById(ids);
 	}
 
 	/**
@@ -62,13 +64,6 @@ public class ProductService {
 	 * @return thông tin sản phẩm
 	 */
 	public List<Product> findProductSellExpiryDate(Pageable pageable) {
-//         List<Product> entities = findAll(pageable).stream().filter(e ->
-//         {
-//             if(e.getEndDatetime() == null){
-//                 return true;
-//             }
-//             return e.getEndDatetime().isAfter(LocalDateTime.now());
-//         }).collect(Collectors.toList());
 		List<Product> entities = findAll(pageable).stream()
 				.filter(e -> e.getEndDatetime() == null || e.getEndDatetime().isAfter(LocalDateTime.now()))
 				.collect(Collectors.toList());
@@ -81,12 +76,6 @@ public class ProductService {
 	 * @return thông tin sản phẩm
 	 */
 	public List<Product> findProductSellExpiredDate(Pageable pageable) {
-//		List<Product> entities = findAll(pageable).stream().filter(e -> {
-//			if (e.getEndDatetime() == null) {
-//				return false;
-//			}
-//			return e.getEndDatetime().isBefore(LocalDateTime.now());
-//		}).collect(Collectors.toList());
 		List<Product> entities = findAll(pageable).stream()
 				.filter(e -> e.getEndDatetime() == null || e.getEndDatetime().isBefore(LocalDateTime.now()))
 				.collect(Collectors.toList());
@@ -102,9 +91,6 @@ public class ProductService {
 	 */
 	public Product findById(long id) throws MyException {
 		Optional<Product> productOptional = productRepository.findById(id);
-//		if (productOptional.isEmpty()) {
-//			throw new MyException(HttpStatus.BAD_REQUEST, "0008", "MSG_W0003", "thông tin sản phẩm");
-//		}
 		return productOptional
 				.orElseThrow(() -> new MyException(HttpStatus.BAD_REQUEST, "0008", "MSG_W0003", "thông tin sản phẩm"));
 	}
@@ -118,9 +104,6 @@ public class ProductService {
 	 */
 	public Product findBySlug(String slug) throws MyException {
 		Optional<Product> productOptional = productRepository.findBySlug(slug);
-//		if (productOptional.isEmpty()) {
-//			throw new MyException(HttpStatus.BAD_REQUEST, "0008", "MSG_W0003", "thông tin sản phẩm");
-//		}
 		return productOptional
 				.orElseThrow(() -> new MyException(HttpStatus.BAD_REQUEST, "0008", "MSG_W0003", "thông tin sản phẩm"));
 	}
@@ -146,10 +129,14 @@ public class ProductService {
 		return productRepository.save(product);
 	}
 
-	public void saveProductWithCsv(MultipartFile file, boolean isHeader) throws MyException {
+	/**
+	 * Thêm thông tin sản phẩm sử dụng csv
+	 * @param file file csv
+	 * @throws MyException
+	 */
+	public void saveProductWithCsv(MultipartFile file) throws MyException {
 		// kiểm tra định dang csv
-		Predicate<String> extensionPredicate = fileName -> fileName.endsWith(".csv");
-		if (!FileUtil.checkExtension(file.getOriginalFilename(), extensionPredicate)) {
+		if (!file.getContentType().startsWith("text/csv")) {
 			throw new MyException(HttpStatus.BAD_REQUEST, "0009", "MSG_W0010");
 		}
 
@@ -163,14 +150,9 @@ public class ProductService {
 				content.append((char) c);
 			}
 			rawContents = Arrays.asList(content.toString().split("\\r\\n"));
-			Stream<String> strStream = rawContents.stream();
-			// kiểm tra header
-			if (isHeader) {
-				strStream = strStream.skip(1);
-			}
-
+			
 			// xử lý nội dung
-			List<Product> products = strStream.map(str -> {
+			List<Product> products = rawContents.stream().map(str -> {
 				String[] strs = str.split("[,]");
 				Product product = new Product();
 				product.setName(strs[0]);
@@ -204,31 +186,11 @@ public class ProductService {
 	 */
 	public String saveImageFile(MultipartFile multipartFile, String productSlug)
 			throws IOException, ImageNotExtensionException {
-		String extension = getImageExtension(multipartFile.getOriginalFilename());
+		String extension = getImageExtension(multipartFile);
 		String fileName = productSlug + "." + extension;
 		File file = new File(getPathImage(fileName));
 		FileCopyUtils.copy(multipartFile.getBytes(), file);
 		return fileName;
-	}
-
-	@Deprecated
-	public Product save(ProductForm form) {
-		DateTimeFormatter dtf = DateTimeFormatter.ISO_DATE_TIME;
-		Product entity = new Product();
-		entity.setName(form.getName());
-		entity.setSlug(CommonUtils.toSlug(entity.getName()));
-		entity.setPrice(Integer.parseInt(form.getPrice()));
-//        entity.setThumbnailUrl(form.getThumbnailUrl());
-		entity.setShortDescription(form.getShortDescription());
-		entity.setDescription(form.getDescription());
-		entity.setCategoryId(Long.parseLong(form.getCategoryId()));
-		entity.setBrandId(Long.parseLong(form.getBrandId()));
-		entity.setStartDatetime(LocalDateTime.parse(form.getStartDatetime(), dtf));
-		if (StringUtils.hasText(form.getEndDatetime())) {
-			entity.setEndDatetime(LocalDateTime.parse(form.getEndDatetime(), dtf));
-		}
-		entity.setCreateDatetime(LocalDateTime.now());
-		return productRepository.save(entity);
 	}
 
 	/**
@@ -238,31 +200,6 @@ public class ProductService {
 	 */
 	public void delete(long id) {
 		productRepository.deleteById(id);
-	}
-
-	/**
-	 * tạo đường dẫn hình ảnh từ tên ảnh
-	 * 
-	 * @param fileName
-	 * @return đường dẫn hình ảnh
-	 */
-	private String getPathImage(String fileName) {
-		File file = new File(rootPath, fileName);
-		return file.getAbsolutePath();
-	}
-
-	/**
-	 * Kiểm tra đuôi định dạng hình ảnh
-	 * 
-	 * @param fileName
-	 * @return {@code true} là định dạng hình ảnh, {@code false} không phải định
-	 *         dạng hình ảnh
-	 */
-	private boolean isImage(String fileName) {
-		Predicate<String> predicate = file -> file.endsWith(".jpg") || file.endsWith(".jpeg") || file.endsWith(".png")
-				|| file.endsWith(".svg");
-		
-		return FileUtil.checkExtension(fileName, predicate);
 	}
 
 	/**
@@ -283,17 +220,28 @@ public class ProductService {
 	}
 
 	/**
+	 * tạo đường dẫn hình ảnh từ tên ảnh
+	 * 
+	 * @param fileName
+	 * @return đường dẫn hình ảnh
+	 */
+	private String getPathImage(String fileName) {
+		File file = new File(rootPath, fileName);
+		return file.getAbsolutePath();
+	}
+
+	/**
 	 * lấy đuôi định dạng hình ảnh
 	 * 
 	 * @param fileName
 	 * @return định dạng hình ảnh (.jpg, .jpeg,...)
 	 * @throws ImageNotExtensionException
 	 */
-	private String getImageExtension(String fileName) throws ImageNotExtensionException {
-		if (!isImage(fileName)) {
+	private String getImageExtension(MultipartFile file) throws ImageNotExtensionException {
+		if (!FileUtil.checkImage(file.getContentType())) {
 			throw new ImageNotExtensionException();
 		}
-		String[] splits = fileName.split("\\.");
+		String[] splits = file.getOriginalFilename().split("\\.");
 		return splits[splits.length - 1];
 	}
 }

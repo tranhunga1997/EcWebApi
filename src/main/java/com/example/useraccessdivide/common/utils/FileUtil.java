@@ -14,8 +14,8 @@ public class FileUtil {
 	
 	private FileUtil() {}
 	
-	public static boolean checkExtension(String fileName, Predicate<String> condition) {
-		return condition.test(fileName);
+	public static boolean checkImage(String contentType) {
+		return contentType.startsWith("image/");
 	}
 	
 	public static byte[] readByte(File file) throws FileNotFoundException, IOException {

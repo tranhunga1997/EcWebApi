@@ -30,7 +30,8 @@ class ProductServiceTest {
 	void testAddProductWithCsv() throws IOException, MyException {
 		FileInputStream fis = new FileInputStream(new File("C:\\Users\\tranh\\Desktop\\product.csv"));
 		MultipartFile multipartFile = new MockMultipartFile("product", "product.csv", null, fis.readAllBytes());
-		service.saveProductWithCsv(multipartFile, true);
+		service.saveProductWithCsv(multipartFile);
 	}
+	
 
 }

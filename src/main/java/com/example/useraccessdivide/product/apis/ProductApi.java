@@ -3,15 +3,20 @@ package com.example.useraccessdivide.product.apis;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,15 +28,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.useraccessdivide.common.Pagingation;
+import com.example.useraccessdivide.common.constant.CommonConstant;
 import com.example.useraccessdivide.common.exception.MyException;
 import com.example.useraccessdivide.common.utils.CommonUtils;
+import com.example.useraccessdivide.product.dtos.ProductDetailDto;
 import com.example.useraccessdivide.product.dtos.ProductDto;
 import com.example.useraccessdivide.product.entities.Product;
 import com.example.useraccessdivide.product.exceptions.ImageNotExtensionException;
 import com.example.useraccessdivide.product.forms.ProductForm;
 import com.example.useraccessdivide.product.forms.ProductSearchForm;
-import com.example.useraccessdivide.product.services.BrandService;
-import com.example.useraccessdivide.product.services.CategoryService;
 import com.example.useraccessdivide.product.services.ProductService;
 import com.example.useraccessdivide.product.specifications.ProductSpecification;
 
@@ -42,6 +47,7 @@ import io.swagger.annotations.ApiResponses;
 
 @RestController
 @RequestMapping("/api/v1/product")
+@CrossOrigin("*")
 @Api(value = "Product api", tags = { "api sản phẩm" })
 public class ProductApi {
 
@@ -59,10 +65,20 @@ public class ProductApi {
 
 	@ApiOperation(value = "Xem và tìm kiếm sản phẩm")
 	@GetMapping
-	ResponseEntity<Pagingation<Product>> productView(ProductSearchForm form,
-			@RequestParam(name = "page", defaultValue = "1") int currentPage) {
+	ResponseEntity<Pagingation<ProductDto>> productView(ProductSearchForm form,
+			@RequestParam(defaultValue = "1") int page) throws InterruptedException {
 		form.setPriceOrder(form.getPriceOrder() == null ? "asc" : form.getPriceOrder());
-		return ResponseEntity.ok(productSpecification.filter(form, currentPage - 1));
+
+		Page<Product> productPage = productSpecification.filter(form,
+				PageRequest.of(page-1, CommonConstant.PAGE_SIZE));
+		List<ProductDto> results = productPage.stream().map(p -> {
+			ProductDto dto = new ProductDto();
+			BeanUtils.copyProperties(p, dto);
+			return dto;
+		}).collect(Collectors.toList());
+
+		Thread.sleep(1000);
+		return ResponseEntity.ok(new Pagingation<>(results, productPage.getTotalElements(), productPage.getTotalPages()));
 	}
 
 	@ApiOperation(value = "Thêm sản phẩm mới")
@@ -79,24 +95,28 @@ public class ProductApi {
 			entity.setThumbnailUrl(productService.saveImageFile(form.getFile(), CommonUtils.toSlug(form.getName())));
 			entity.setShortDescription(form.getShortDescription());
 			entity.setDescription(form.getDescription());
-			entity.setCategoryId(Long.parseLong(form.getCategoryId()));	
+			entity.setCategoryId(Long.parseLong(form.getCategoryId()));
 			entity.setBrandId(Long.parseLong(form.getBrandId()));
 			entity.setStartDatetime(LocalDateTime.parse(form.getStartDatetime(), dtf));
 			if (StringUtils.hasText(form.getEndDatetime())) {
 				entity.setEndDatetime(LocalDateTime.parse(form.getEndDatetime(), dtf));
 			}
 			entity.setCreateDatetime(LocalDateTime.now());
-
-			return ResponseEntity.ok(productService.save(entity));
+			ResponseEntity.ok(productService.save(entity));
+			return null;
 		} catch (IOException e) {
 			throw new MyException(HttpStatus.BAD_REQUEST, "0010", "MSG_W0009", "lưu hình ảnh");
 		} catch (ImageNotExtensionException e) {
 			throw new MyException(HttpStatus.BAD_REQUEST, "0009", "MSG_W0008");
 		}
 	}
-	
-	ResponseEntity<?> createProductWithCsv(MultipartFile file, boolean isHeader) throws MyException {
-		productService.saveProductWithCsv(file, isHeader);
+
+	@ApiOperation(value = "Thêm sản phẩm mới (csv)")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Thành công"),
+			@ApiResponse(code = 400, message = "Thất bại") })
+	@PostMapping("/csv")
+	ResponseEntity<?> createProductWithCsv(MultipartFile file) throws MyException {
+		productService.saveProductWithCsv(file);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
@@ -104,9 +124,9 @@ public class ProductApi {
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Thành công"),
 			@ApiResponse(code = 400, message = "Thất bại") })
 	@GetMapping("/detail/{id}")
-	ResponseEntity<ProductDto> detail(@PathVariable long id) throws MyException {
+	ResponseEntity<ProductDetailDto> detail(@PathVariable long id) throws MyException {
 		Product entityResult = productService.findById(id);
-		ProductDto dto = new ProductDto();
+		ProductDetailDto dto = new ProductDetailDto();
 		BeanUtils.copyProperties(entityResult, dto);
 		return ResponseEntity.ok(dto);
 	}
@@ -125,7 +145,7 @@ public class ProductApi {
 		entity.setPrice(Integer.parseInt(form.getPrice()));
 		entity.setShortDescription(form.getShortDescription());
 		entity.setDescription(form.getDescription());
-		entity.setCategoryId(Long.parseLong(form.getCategoryId()));	
+		entity.setCategoryId(Long.parseLong(form.getCategoryId()));
 		entity.setBrandId(Long.parseLong(form.getBrandId()));
 		entity.setStartDatetime(LocalDateTime.parse(form.getStartDatetime(), DateTimeFormatter.ISO_DATE_TIME));
 		if (StringUtils.hasText(form.getEndDatetime())) {

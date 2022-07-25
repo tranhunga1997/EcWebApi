@@ -3,7 +3,6 @@ package com.example.useraccessdivide.product.specifications;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -13,10 +12,12 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.example.useraccessdivide.common.Pagingation;
 import com.example.useraccessdivide.product.entities.Brand;
 import com.example.useraccessdivide.product.entities.Category;
 import com.example.useraccessdivide.product.entities.Product;
@@ -28,7 +29,7 @@ import com.example.useraccessdivide.product.services.CategoryService;
 @Component
 public final class ProductSpecification {
     @Autowired
-    private EntityManager entityManager;
+    private EntityManager em;
     @Autowired
     private CategoryService categoryService;
     @Autowired
@@ -36,12 +37,12 @@ public final class ProductSpecification {
 
     public List<Product> findAll(){
         try {
-            CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+            CriteriaBuilder builder = em.getCriteriaBuilder();
             CriteriaQuery<Product> criteriaQuery = builder.createQuery(Product.class);
             Root<Product> root = criteriaQuery.from(Product.class);
             criteriaQuery.select(root).orderBy(builder.desc(root.get("id")));
 
-            TypedQuery<Product> result = entityManager.createQuery(criteriaQuery);
+            TypedQuery<Product> result = em.createQuery(criteriaQuery);
             return result.getResultList();
         }catch (Exception e){
             e.printStackTrace();
@@ -50,8 +51,8 @@ public final class ProductSpecification {
 
     }
 
-    public Pagingation<Product> filter(ProductSearchForm form, int currentPage){
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+    public Page<Product> filter(ProductSearchForm form, Pageable pageable){
+        CriteriaBuilder builder = em.getCriteriaBuilder();
         CriteriaQuery<Product> query = builder.createQuery(Product.class);
         Root<Product> root = query.from(Product.class);
         List<Predicate> conditionList = new ArrayList<>();
@@ -91,15 +92,18 @@ public final class ProductSpecification {
         }else {
         	query.select(root).where(builder.and(conditionList.toArray(new Predicate[0])));
         }
-        int limit = 2;
-    	int offSet = (currentPage - 1)*limit;
-        TypedQuery<Product> result = entityManager.createQuery(query);
-        List<Product> resultList = result.getResultList();
         
-        Pagingation<Product> page = new Pagingation<Product>();
-        page.setDatas(resultList.stream().skip(offSet).limit(limit).collect(Collectors.toList()));
-        page.setTotalElement(resultList.size());
-        page.setTotalPage(Math.round(resultList.size()/limit));
-        return page;
+		TypedQuery<Product> result = em.createQuery(query)
+				.setFirstResult((int) pageable.getOffset())
+				.setMaxResults(pageable.getPageSize());
+        List<Product> resultList = result.getResultList();
+        long totalElement = getTotalProduct();
+
+        return new PageImpl<Product>(resultList, pageable, totalElement);
+    }
+    
+    public long getTotalProduct() {
+    	Object total = em.createQuery("SELECT COUNT(p) FROM Product p").getSingleResult();
+    	return Long.parseLong(total.toString());
     }
 }

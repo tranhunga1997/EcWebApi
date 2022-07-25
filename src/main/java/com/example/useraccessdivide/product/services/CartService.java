@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.example.useraccessdivide.common.Pagingation;
 import com.example.useraccessdivide.common.exception.MyException;
 import com.example.useraccessdivide.product.dtos.CartProductDto;
-import com.example.useraccessdivide.product.dtos.ProductDto;
+import com.example.useraccessdivide.product.dtos.ProductDetailDto;
 import com.example.useraccessdivide.product.entities.CartItem;
 import com.example.useraccessdivide.product.repositories.CartRepository;
 import com.example.useraccessdivide.user.services.UserService;
@@ -40,7 +40,7 @@ public class CartService {
 		List<CartProductDto> cartProductDtos = page.stream()
 				.map(value -> {
 					CartProductDto dto = new CartProductDto();
-					ProductDto pDto = new ProductDto();
+					ProductDetailDto pDto = new ProductDetailDto();
 					BeanUtils.copyProperties(value.getProduct(), pDto);
 					dto.setUserId(value.getUserId());
 					dto.setProductInfo(pDto);
