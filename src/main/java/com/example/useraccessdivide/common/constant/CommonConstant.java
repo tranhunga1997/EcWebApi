@@ -15,4 +15,5 @@ public class CommonConstant {
 	public static final int PAGE_SIZE = 10;
 	public static final int REFRESH_TOKEN_EXPYRIED_DAY = 3;
 	public static final int LOGIN_FAILED_NUM = 5;
+	public static final String STATIC_PATH = "src/main/resources/static";
 }

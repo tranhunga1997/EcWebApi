@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
@@ -29,6 +30,7 @@ import com.example.useraccessdivide.common.exception.MyException;
 import com.example.useraccessdivide.common.utils.EmailUtil;
 import com.example.useraccessdivide.product.dtos.CartHistoryDto;
 import com.example.useraccessdivide.product.dtos.CartProductDto;
+import com.example.useraccessdivide.product.entities.CartItem;
 import com.example.useraccessdivide.product.entities.Product;
 import com.example.useraccessdivide.product.forms.CartHistoryForm;
 import com.example.useraccessdivide.product.forms.CartProductForm;
@@ -84,49 +86,28 @@ public class CartApi {
 
 	@ApiOperation(value = "Thanh toán", notes = "chưa tích hợp api thanh toán.")
 	@PostMapping("/pay/{userId}")
-	ResponseEntity<?> pay(@PathVariable long userId, @RequestBody List<CartProductForm> forms) throws MyException {
+	ResponseEntity<?> pay(@PathVariable long userId) throws MyException {
 		// xóa giỏ hàng
-		cartService.delete(userId);
-
-		// thêm vào lịch sử (CartHistoryForm)
-		List<Long> cardProductIds = forms.stream().map(item -> item.getProductId()).collect(Collectors.toList());
-		List<Product> productInCart = productService.findAllById(cardProductIds);
-
-		List<CartHistoryForm> cartHistoryForms = productInCart.stream().map(p -> {
-			// lấy số lượng từ List<CartProductForm>
-			int quantity = forms.stream().filter(item -> item.getProductId() == p.getId())
-					.mapToInt(item -> item.getQuantity()).findFirst().getAsInt();
-			CartHistoryForm form = new CartHistoryForm();
-			form.setUserId(userId);
-			form.setProductName(p.getName());
-			form.setPrice(p.getPrice());
-			form.setQuantity(quantity);
-			form.setAddress("AAA");
-			return form;
+		List<CartItem> cartItemDeleteds = cartService.delete(userId);
+		List<Product> products = productService
+				.findAllById(cartItemDeleteds.stream().map(CartItem::getProductId).collect(Collectors.toList()));
+		// gửi mail cho khách (CartHistoryDto)
+		List<CartHistoryDto> cartHistoryDtos = cartItemDeleteds.stream().map(item -> {
+			CartHistoryDto cartHistoryDto = new CartHistoryDto();
+			cartHistoryDto.setProductId(products.stream().filter(e -> e.getId() == item.getProductId())
+					.mapToLong(Product::getId).findFirst().getAsLong());
+			cartHistoryDto.setProductName(products.stream().filter(e -> e.getId() == item.getProductId())
+					.map(Product::getName).findFirst().get());
+			cartHistoryDto.setPrice(products.stream().filter(e -> e.getId() == item.getProductId())
+					.map(Product::getPrice).findFirst().get());
+			cartHistoryDto.setQuantity(item.getQuantity());
+			cartHistoryDto.setBoughtDatetime(LocalDateTime.now());
+			return cartHistoryDto;
 		}).collect(Collectors.toList());
 
-		cartHistoryService.saveAll(cartHistoryForms);
+		long total = cartHistoryDtos.stream().reduce(0, (base, value) -> base + value.getPrice() * value.getQuantity(),
+				Integer::sum);
 
-		// gửi mail cho khách (CartHistoryDto)
-		List<CartHistoryDto> cartHistoryDtos = cartHistoryForms.stream()
-				.map(item -> {
-					CartHistoryDto cartHistoryDto = new CartHistoryDto();
-					BeanUtils.copyProperties(item, cartHistoryDto);
-					cartHistoryDto.setBoughtDatetime(LocalDateTime.now());
-					return cartHistoryDto;
-				})
-				.collect(Collectors.toList());
-		
-		long total = cartHistoryDtos.stream()
-				.reduce(0, (base, value) ->  base + value.getPrice()*value.getQuantity(), Integer::sum);
-//		long total = 0;
-//		for (CartProductForm e : forms) {
-//			Product product = productService.findById(e.getProductId());
-//			cartHistoryDtos
-//					.add(CartHistoryDto.builder().productName(product.getName()).price(product.getPrice())
-//							.quantity(e.getQuantity()).boughtDatetime(LocalDateTime.now()).build());
-//			total += product.getPrice() * e.getQuantity();
-//		}
 		Map<String, Object> map = new HashMap<>();
 		map.put("productList", cartHistoryDtos);
 		map.put("total", total);

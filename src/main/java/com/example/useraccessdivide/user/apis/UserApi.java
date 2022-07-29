@@ -131,7 +131,7 @@ public class UserApi {
 	@ApiResponses(value = { @ApiResponse(code = 400, message = "thất bại"),
 			@ApiResponse(code = 200, message = "thành công") })
 	@PostMapping("/user/get-jwt")
-	ResponseEntity<String> generateJwtByRefreshToken(HttpServletRequest request) throws Exception {
+	ResponseEntity<LoginResponse> generateJwtByRefreshToken(HttpServletRequest request) throws Exception {
 		long refreshTokenId = TokenProvider.getRefreshTokenId(request);
 
 		// Kiểm tra hạn sử dụng refresh token
@@ -142,7 +142,7 @@ public class UserApi {
 		// khởi tạo jwt
 		User user = userService.findById(refreshTokenEntity.getUserId());
 		String jwt = TokenProvider.generateJwt(user.getUsername(), refreshTokenEntity.getId());
-		return ResponseEntity.status(HttpStatus.OK).body(jwt);
+		return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(jwt));
 	}
 
 	@ApiOperation(value = "Đăng nhập", response = List.class)

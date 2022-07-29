@@ -24,6 +24,7 @@ public class BaseSwaggerConfig {
     public Docket api() {
 
         return new Docket(DocumentationType.SWAGGER_2)
+//        		.host("domain")
                 .useDefaultResponseMessages(false)
                 .select()
                 .apis(RequestHandlerSelectors.any())
@@ -33,8 +34,8 @@ public class BaseSwaggerConfig {
     }
     
     private ApiInfo apiEndPointsInfo(){
-        return new ApiInfoBuilder().title("User Api")
-                .description("Dự án api thương mại điện tử")
+        return new ApiInfoBuilder().title("Electronic commerce api")
+                .description("Api thương mại điện tử")
                 .version("1.0")
                 .contact(new Contact("Mạnh Hùng", "", "tranhung1997@gmail.com"))
                 .build();

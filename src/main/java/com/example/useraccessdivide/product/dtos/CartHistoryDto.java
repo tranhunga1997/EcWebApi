@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartHistoryDto {
+	private long productId;
     private String productName;
     private int price;
     private int quantity;

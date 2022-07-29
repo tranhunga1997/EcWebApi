@@ -1,5 +1,7 @@
 package com.example.useraccessdivide.product.apis;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -12,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +34,7 @@ import com.example.useraccessdivide.common.Pagingation;
 import com.example.useraccessdivide.common.constant.CommonConstant;
 import com.example.useraccessdivide.common.exception.MyException;
 import com.example.useraccessdivide.common.utils.CommonUtils;
+import com.example.useraccessdivide.common.utils.FileUtil;
 import com.example.useraccessdivide.product.dtos.ProductDetailDto;
 import com.example.useraccessdivide.product.dtos.ProductDto;
 import com.example.useraccessdivide.product.entities.Product;
@@ -70,7 +74,7 @@ public class ProductApi {
 		form.setPriceOrder(form.getPriceOrder() == null ? "asc" : form.getPriceOrder());
 
 		Page<Product> productPage = productSpecification.filter(form,
-				PageRequest.of(page-1, CommonConstant.PAGE_SIZE));
+				PageRequest.of(page - 1, CommonConstant.PAGE_SIZE));
 		List<ProductDto> results = productPage.stream().map(p -> {
 			ProductDto dto = new ProductDto();
 			BeanUtils.copyProperties(p, dto);
@@ -78,7 +82,8 @@ public class ProductApi {
 		}).collect(Collectors.toList());
 
 		Thread.sleep(1000);
-		return ResponseEntity.ok(new Pagingation<>(results, productPage.getTotalElements(), productPage.getTotalPages()));
+		return ResponseEntity
+				.ok(new Pagingation<>(results, productPage.getTotalElements(), productPage.getTotalPages()));
 	}
 
 	@ApiOperation(value = "Thêm sản phẩm mới")
@@ -161,5 +166,14 @@ public class ProductApi {
 	ResponseEntity<?> delete(@PathVariable long id) {
 		productService.delete(id);
 		return ResponseEntity.status(HttpStatus.OK).build();
+	}
+
+	@ApiOperation(value = "Tải product template (csv)")
+	@GetMapping(value = "csv/product-template.csv")
+	ResponseEntity<?> downloadProductCsvTemplate() throws FileNotFoundException, IOException {
+		byte[] bytes = FileUtil.readByte(new File(CommonConstant.STATIC_PATH, "product-template.csv"));
+		return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=product-template.csv")
+				.body(bytes);
 	}
 }
